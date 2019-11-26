@@ -1,13 +1,16 @@
 using HamstarHelpers.Helpers.Debug;
+using HamstarHelpers.Helpers.TModLoader;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Utilities;
 
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
-		public static void Strike( Player player, Vector2 direction, NPC npc ) {
+		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, NPC npc ) {
 			if( npc.immortal ) {
 				return;
 			}
@@ -18,8 +21,12 @@ namespace Bullwhip.Items {
 
 			switch( npc.aiStyle ) {
 			case 1:     // slimes
+				BullwhipItem.ApplySlimeshot( npc );
 				break;
 			case 3:     // fighters
+				if( BullwhipItem.IsHeadshot( npc, hitWorldPosition ) ) {
+					BullwhipItem.ApplyHeadshot( npc );
+				}
 				break;
 			case 14:    // bats
 				if( BullwhipConfig.Instance.IncapacitatesBats && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
@@ -38,11 +45,26 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static bool IsHeadshot( NPC npc, Vector2 targetPoint ) ) {
+		public static void ApplySlimeshot( NPC npc ) {
+			f
+		}
+
+		////////////////
+
+		public static bool IsHeadshot( NPC npc, Vector2 targetPoint ) {
+			Rectangle rect = npc.getRect();
+			rect.X -= rect.Width / 4;
+			rect.Width += rect.Width / 2;
+			rect.Height /= 3;
+
+			return rect.Contains( (int)targetPoint.X, (int)targetPoint.Y );
 		}
 
 		public static void ApplyHeadshot( NPC npc ) {
+			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
+			int tickDuration = 60 * rand.Next(4, 16);
 
+			npc.AddBuff( BuffID.Confused, tickDuration );
 		}
 	}
 }

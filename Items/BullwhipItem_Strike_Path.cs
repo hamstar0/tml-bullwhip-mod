@@ -1,5 +1,6 @@
 using HamstarHelpers.Helpers.Collisions;
 using HamstarHelpers.Helpers.Debug;
+using HamstarHelpers.Helpers.DotNET.Extensions;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -22,17 +23,14 @@ namespace Bullwhip.Items {
 			int endTileY = (int)maxPos.Y >> 4;
 
 			bool isTileHit = false;
-			IEnumerable<NPC> hitNpcs = null;
+			IDictionary<Vector2, IEnumerable<NPC>> hitNpcAt = new Dictionary<Vector2, IEnumerable<NPC>>();
 
 			///
 
 			Func<Vector2, bool> checkPerUnit = (wldPos) => {
+				IEnumerable<NPC> hitNpcs = null;
 				if( BullwhipItem.FindWhipUnitCollisionAt( plrCenter, wldPos, minWhipDist, out hitNpcs ) ) {
-					foreach( NPC npc in hitNpcs ) {
-						if( BullwhipItem.IsHeadshot(npc, wldPos ) ) {
-							BullwhipItem.ApplyHeadshot( npc );
-						}
-					}
+					hitNpcAt[wldPos] = hitNpcs;
 					return true;
 				}
 				return false;
@@ -53,9 +51,9 @@ namespace Bullwhip.Items {
 
 			CollisionHelpers.CastRay( plrCenter, direction, maxWhipDist, checkPerUnit, checkPerTile );
 
-			if( hitNpcs != null ) {
-				foreach( NPC npc in hitNpcs ) {
-					BullwhipItem.Strike( player, direction, npc );
+			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcAt ) {
+				foreach( NPC npc in npcs ) {
+					BullwhipItem.Strike( player, direction, target, npc );
 				}
 			}
 
@@ -71,14 +69,14 @@ namespace Bullwhip.Items {
 					Vector2 startPos,
 					Vector2 currPos,
 					int minNpcHitWorldDistance,
-					out IEnumerable<NPC> hitNpcs ) {
+					out IEnumerable<NPC> hitNpcsAt ) {
 			int minNpcTileDist = minNpcHitWorldDistance >> 4;
 			int minNpcTileDistSqr = minNpcTileDist * minNpcTileDist;
 			Vector2 dist = startPos - currPos;
 			Vector2 distSqr = dist * dist;
 
 			if( (distSqr.X + distSqr.Y) >= minNpcTileDistSqr ) {
-				hitNpcs = Main.npc.Where( anyNpc => {
+				hitNpcsAt = Main.npc.Where( anyNpc => {
 					if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
 						return false;
 					}
@@ -87,10 +85,10 @@ namespace Bullwhip.Items {
 					return Vector2.DistanceSquared(anyNpc.Center, currPos) < 1024;	// 32^2
 				} );
 			} else {
-				hitNpcs = new NPC[] { };
+				hitNpcsAt = new NPC[] { };
 			}
 
-			return hitNpcs.Count() > 0;
+			return hitNpcsAt.Count() > 0;
 		}
 
 		private static bool FindWhipTileCollisionAt( int currTileX, int currTileY, out bool isPlatform ) {

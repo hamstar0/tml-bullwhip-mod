@@ -24,7 +24,7 @@ namespace Bullwhip.Items {
 			this.DisplayName.SetDefault( "Bullwhip" );
 			this.Tooltip.SetDefault( "Long reach, low damage melee weapon."
 				+"\nIncapacitates bats."
-				+"\nHold attack to immobilize a single target within range (allows item changing)."
+				+"\nAim for the head to disorient."
 				+"\nMay attach to platforms or vines."
 			);
 		}
