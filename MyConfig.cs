@@ -31,18 +31,18 @@ namespace Bullwhip {
 		public bool PlayerSpawnsWithWhip { get; set; } = true;
 
 
-		[DefaultValue( 48 )]
-		public int MinimumWhipDist { get; set; } = 48;
+		[DefaultValue( 104 )]
+		public int MinimumWhipDist { get; set; } = 104;
 
 		[DefaultValue( 128 )]
 		public int MaximumWhipDist { get; set; } = 128;
 
-		[DefaultValue( 10 )]
-		public int WhipDamage { get; set; } = 10;
+		[DefaultValue( 15 )]
+		public int WhipDamage { get; set; } = 15;
 
-		[DefaultValue( 10 )]
+		[DefaultValue( 20f )]
 		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
-		public float WhipKnockback { get; set; } = 15f;
+		public float WhipKnockback { get; set; } = 20f;
 
 
 

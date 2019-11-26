@@ -127,6 +127,13 @@ namespace Bullwhip.Projectiles {
 				if( !this.IsLastFrame ) {
 					proj.frame++;
 				}
+
+				if( proj.frame == 4 ) {
+					var sndPos = proj.position;
+					sndPos += Vector2.Normalize(proj.velocity) * BullwhipConfig.Instance.MaximumWhipDist;
+
+					BullwhipItem.PlaySound( sndPos );
+				}
 			}
 		}
 

@@ -1,8 +1,8 @@
 using HamstarHelpers.Helpers.Collisions;
 using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.NPCs;
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
@@ -10,117 +10,145 @@ using Terraria.ModLoader;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
+		public static void PlaySound( Vector2 pos ) {
+			int soundSlot = BullwhipMod.Instance.GetSoundSlot( SoundType.Custom, "Sounds/Custom/BullwhipCrackSound" );
+			Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.8f );
+		}
+
+		public static void CreateHitFx( Vector2 pos, bool isNpc ) {
+			Color color = isNpc ? Color.Lerp(Color.Red, Color.White, 0.5f) : Color.White;
+			int alpha = isNpc ? 128 : 192;
+			float scale = 0.75f;
+			int width = 16;
+			pos.X -= width / 2;
+			pos.Y -= width / 2;
+
+			Dust dust;
+			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
+			dust.noGravity = true;
+			dust.fadeIn = 3f;
+			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
+			dust.noGravity = true;
+			dust.fadeIn = 3f;
+			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
+			dust.noGravity = true;
+			dust.fadeIn = 3f;
+			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
+			dust.noGravity = true;
+			dust.fadeIn = 3f;
+			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
+			dust.noGravity = true;
+			dust.fadeIn = 3f;
+			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
+			dust.noGravity = true;
+			dust.fadeIn = 3f;
+		}
+
+
+		////////////////
+
 		public static void AttemptWhipStrike( Player player, Vector2 direction ) {
-			float minWhipDist = BullwhipConfig.Instance.MinimumWhipDist;
-			float maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
+			int minWhipDist = BullwhipConfig.Instance.MinimumWhipDist;
+			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
 			direction.Normalize();
 			
 			Vector2 plrCenter = player.RotatedRelativePoint( player.MountedCenter, true );
 			Vector2 maxPos = plrCenter + (direction * maxWhipDist);
 
+			int srcTileX = (int)plrCenter.X >> 4;
+			int srcTileY = (int)plrCenter.Y >> 4;
 			int hitTileX = (int)maxPos.X >> 4;
 			int hitTileY = (int)maxPos.Y >> 4;
-			int hitNpcWho = -1;
+			IEnumerable<NPC> hitNpcs = null;
 
-			Func<int, int, bool> collider = ( x, y ) => {
-LogHelpers.Log( "testing "+x+", "+y);
-Dust.NewDustPerfect( new Vector2(x<<4, y<<4), 1, null, 0, default(Color), 3f );
+			Func<int, int, bool> collider = (currTileX, currTileY) => {
 				bool _;
-				if( BullwhipItem.FindWhipCollisionAt(x, y, out hitNpcWho, out _) ) {
-					hitTileX = x;
-					hitTileY = y;
-LogHelpers.Log( "hit at "+x+", "+y+" npc:"+hitNpcWho);
+				if( BullwhipItem.FindWhipCollisionAt(srcTileX, srcTileY, currTileX, currTileY, minWhipDist, out hitNpcs, out _) ) {
+					hitTileX = currTileX;
+					hitTileY = currTileY;
 					return true;
 				}
 				return false;
 			};
 
-			bool isHit = TileCollisionHelpers.CastTileRay(
-				plrCenter,
-				direction,
-				(int)maxWhipDist,
-				collider
-			);
+			TileCollisionHelpers.CastTileRay( plrCenter, direction, maxWhipDist, collider );
 
-			if( hitNpcWho != -1 ) {
-				BullwhipItem.Strike( player, direction, hitNpcWho );
+			if( hitNpcs != null ) {
+				foreach( NPC npc in hitNpcs ) {
+					BullwhipItem.Strike( player, direction, npc );
+				}
 			}
 
-			///
+			if( hitNpcs == null || hitNpcs.Count() == 0 ) {
+				var hitWorldPos = new Vector2( hitTileX << 4, hitTileY << 4 );
 
-			var hitPos = new Vector2( hitTileX<<4, hitTileY<<4 );
-			int width = 16;
-			hitPos.X -= width / 2;
-			hitPos.Y -= width / 2;
-
-			Dust dust;
-			dust = Main.dust[ Dust.NewDust( hitPos, width, width, 31, 0f, 0f, 192, new Color(255, 255, 255), 0.75f ) ];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[ Dust.NewDust( hitPos, width, width, 31, 0f, 0f, 192, new Color(255, 255, 255), 0.75f ) ];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[ Dust.NewDust( hitPos, width, width, 31, 0f, 0f, 192, new Color(255, 255, 255), 0.75f ) ];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[ Dust.NewDust( hitPos, width, width, 31, 0f, 0f, 192, new Color(255, 255, 255), 0.75f ) ];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[ Dust.NewDust( hitPos, width, width, 31, 0f, 0f, 192, new Color(255, 255, 255), 0.75f ) ];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[ Dust.NewDust( hitPos, width, width, 31, 0f, 0f, 192, new Color(255, 255, 255), 0.75f ) ];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-
-			int soundSlot = BullwhipMod.Instance.GetSoundSlot( SoundType.Custom, "Sounds/Custom/BullwhipCrackSound" );
-			Main.PlaySound( (int)SoundType.Custom, (int)hitPos.X, (int)hitPos.Y, soundSlot, 0.8f );
+				BullwhipItem.CreateHitFx( hitWorldPos, false );
+				//BullwhipItem.PlaySound( hitPos );
+			}
 		}
 
 
 		////
 
-		private static bool FindWhipCollisionAt( int tileX, int tileY, out int hitNpcWho, out bool isPlatform ) {
-			NPC hitNpc = Main.npc.FirstOrDefault( anyNpc => {
-				if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
+		private static bool FindWhipCollisionAt(
+					int srcTileX,
+					int srcTileY,
+					int currTileX,
+					int currTileY,
+					int minNpcHitWorldDistance,
+					out IEnumerable<NPC> hitNpcs,
+					out bool isPlatform ) {
+			int minNpcTileDist = minNpcHitWorldDistance >> 4;
+			int minNpcTileDistSqr = minNpcTileDist * minNpcTileDist;
+			int distX = srcTileX - currTileX;
+			int distY = srcTileY - currTileY;
+			int distXSqr = distX * distX;
+			int distYSqr = distY * distY;
+
+			if( (distXSqr + distYSqr) >= minNpcTileDistSqr ) {
+				hitNpcs = Main.npc.Where( anyNpc => {
+					if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
+						return false;
+					}
+
+					int nTileX = (int)anyNpc.position.X >> 4;
+					int nTileY = (int)anyNpc.position.Y >> 4;
+
+					if( Math.Abs( nTileX - currTileX ) <= 2 && Math.Abs( nTileY - currTileY ) <= 2 ) {
+						return true;
+					}
 					return false;
-				}
+				} );
 
-				int nTileX = (int)anyNpc.position.X >> 4;
-				int nTileY = (int)anyNpc.position.Y >> 4;
-
-LogHelpers.LogOnce( "npc "+anyNpc.TypeName+"("+anyNpc.whoAmI+") distX:"+Math.Abs(nTileX - tileX)+", distY:"+Math.Abs(nTileY - tileY) );
-				if( Math.Abs(nTileX - tileX) <= 2 && Math.Abs(nTileY - tileY) <= 2 ) {
+				if( hitNpcs.Count() > 0 ) {
+					isPlatform = false;
 					return true;
 				}
-				return false;
-			} );
-
-			hitNpcWho = hitNpc?.whoAmI ?? -1;
-			if( hitNpcWho != -1 ) {
-				isPlatform = false;
-				return true;
 			}
 
-			Tile tile = Framing.GetTileSafely( tileX, tileY );
+			Tile tile = Framing.GetTileSafely( currTileX, currTileY );
 			if( tile.active() && Main.tileSolid[tile.type] ) {
 				isPlatform = !Main.tileSolidTop[tile.type];
+				hitNpcs = new List<NPC>();
 				return true;
 			}
 
 			isPlatform = false;
+			hitNpcs = new List<NPC>();
 			return false;
 		}
 
 
 		////////////////
 
-		public static void Strike( Player player, Vector2 direction, int npcWho ) {
+		public static void Strike( Player player, Vector2 direction, NPC npc ) {
 			BullwhipConfig config = BullwhipConfig.Instance;
-			NPC npc = Main.npc[ npcWho ];
 
 			if( !npc.immortal ) {
-				NPCHelpers.RawHurt( npc, config.WhipDamage, direction * config.WhipKnockback );
+				npc.velocity += direction * config.WhipKnockback;
+				npc.StrikeNPC( config.WhipDamage, config.WhipKnockback, player.direction );
+
+				BullwhipItem.CreateHitFx( npc.Center, true );
 			}
 		}
 	}
