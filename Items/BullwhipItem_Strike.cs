@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 
@@ -142,14 +143,23 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public static void Strike( Player player, Vector2 direction, NPC npc ) {
-			BullwhipConfig config = BullwhipConfig.Instance;
-
-			if( !npc.immortal ) {
-				npc.velocity += direction * config.WhipKnockback;
-				npc.StrikeNPC( config.WhipDamage, config.WhipKnockback, player.direction );
-
-				BullwhipItem.CreateHitFx( npc.Center, true );
+			if( npc.immortal ) {
+				return;
 			}
+
+			BullwhipConfig config = BullwhipConfig.Instance;
+			int dmg = config.WhipDamage;
+			float kb = config.WhipKnockback;
+
+			if( BullwhipConfig.Instance.IncapacitatesBats && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
+				npc.aiStyle = 16;
+				kb = 1f;
+			}
+
+			npc.velocity += direction * kb;
+			npc.StrikeNPC( dmg, kb, player.direction );
+
+			BullwhipItem.CreateHitFx( npc.Center, true );
 		}
 	}
 }
