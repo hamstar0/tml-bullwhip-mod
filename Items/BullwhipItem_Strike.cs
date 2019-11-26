@@ -10,43 +10,6 @@ using Terraria.ModLoader;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
-		public static void PlaySound( Vector2 pos ) {
-			int soundSlot = BullwhipMod.Instance.GetSoundSlot( SoundType.Custom, "Sounds/Custom/BullwhipCrackSound" );
-			Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.5f );
-		}
-
-		public static void CreateHitFx( Vector2 pos, bool isNpc ) {
-			Color color = isNpc ? Color.Lerp(Color.Red, Color.White, 0.5f) : Color.White;
-			int alpha = isNpc ? 128 : 192;
-			float scale = 0.75f;
-			int width = 16;
-			pos.X -= width / 2;
-			pos.Y -= width / 2;
-
-			Dust dust;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-		}
-
-
-		////////////////
-
 		public static void AttemptWhipStrike( Player player, Vector2 direction ) {
 			int minWhipDist = BullwhipConfig.Instance.MinimumWhipDist;
 			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
@@ -55,8 +18,6 @@ namespace Bullwhip.Items {
 			Vector2 plrCenter = player.RotatedRelativePoint( player.MountedCenter, true );
 			Vector2 maxPos = plrCenter + (direction * maxWhipDist);
 
-			int srcTileX = (int)plrCenter.X >> 4;
-			int srcTileY = (int)plrCenter.Y >> 4;
 			int endTileX = (int)maxPos.X >> 4;
 			int endTileY = (int)maxPos.Y >> 4;
 
@@ -66,7 +27,15 @@ namespace Bullwhip.Items {
 			///
 
 			Func<Vector2, bool> checkPerUnit = (wldPos) => {
-				return BullwhipItem.FindWhipUnitCollisionAt( plrCenter, wldPos, minWhipDist, out hitNpcs );
+				if( BullwhipItem.FindWhipUnitCollisionAt( plrCenter, wldPos, minWhipDist, out hitNpcs ) ) {
+					foreach( NPC npc in hitNpcs ) {
+						if( BullwhipItem.IsHeadshot(npc, wldPos ) ) {
+							BullwhipItem.ApplyHeadshot( npc );
+						}
+					}
+					return true;
+				}
+				return false;
 			};
 
 			Func<int, int, bool> checkPerTile = (currTileX, currTileY) => {
