@@ -46,7 +46,12 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public static void ApplySlimeshot( NPC npc ) {
-			f
+			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
+			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
+
+			if( rand.Next(4) == 0 ) {
+				mynpc.ApplyEnrage( npc );
+			}
 		}
 
 		////////////////
