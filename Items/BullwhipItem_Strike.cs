@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 
@@ -13,7 +12,7 @@ namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		public static void PlaySound( Vector2 pos ) {
 			int soundSlot = BullwhipMod.Instance.GetSoundSlot( SoundType.Custom, "Sounds/Custom/BullwhipCrackSound" );
-			Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.8f );
+			Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.5f );
 		}
 
 		public static void CreateHitFx( Vector2 pos, bool isNpc ) {
@@ -58,21 +57,32 @@ namespace Bullwhip.Items {
 
 			int srcTileX = (int)plrCenter.X >> 4;
 			int srcTileY = (int)plrCenter.Y >> 4;
-			int hitTileX = (int)maxPos.X >> 4;
-			int hitTileY = (int)maxPos.Y >> 4;
+			int endTileX = (int)maxPos.X >> 4;
+			int endTileY = (int)maxPos.Y >> 4;
+
+			bool isTileHit = false;
 			IEnumerable<NPC> hitNpcs = null;
 
-			Func<int, int, bool> collider = (currTileX, currTileY) => {
-				bool _;
-				if( BullwhipItem.FindWhipCollisionAt(srcTileX, srcTileY, currTileX, currTileY, minWhipDist, out hitNpcs, out _) ) {
-					hitTileX = currTileX;
-					hitTileY = currTileY;
+			///
+
+			Func<Vector2, bool> checkPerUnit = (wldPos) => {
+				return BullwhipItem.FindWhipUnitCollisionAt( plrCenter, wldPos, minWhipDist, out hitNpcs );
+			};
+
+			Func<int, int, bool> checkPerTile = (currTileX, currTileY) => {
+				bool isPlatform;
+				if( BullwhipItem.FindWhipTileCollisionAt(currTileX, currTileY, out isPlatform) && !isPlatform ) {
+					isTileHit = true;
+					endTileX = currTileX;
+					endTileY = currTileY;
 					return true;
 				}
 				return false;
 			};
 
-			TileCollisionHelpers.CastTileRay( plrCenter, direction, maxWhipDist, collider );
+			///
+
+			CollisionHelpers.CastRay( plrCenter, direction, maxWhipDist, checkPerUnit, checkPerTile );
 
 			if( hitNpcs != null ) {
 				foreach( NPC npc in hitNpcs ) {
@@ -80,63 +90,45 @@ namespace Bullwhip.Items {
 				}
 			}
 
-			if( hitNpcs == null || hitNpcs.Count() == 0 ) {
-				var hitWorldPos = new Vector2( hitTileX << 4, hitTileY << 4 );
-
-				BullwhipItem.CreateHitFx( hitWorldPos, false );
-				//BullwhipItem.PlaySound( hitPos );
+			if( isTileHit ) {
+				BullwhipItem.CreateHitFx( new Vector2(endTileX<<4, endTileY<<4), false );
 			}
 		}
 
 
 		////
 
-		private static bool FindWhipCollisionAt(
-					int srcTileX,
-					int srcTileY,
-					int currTileX,
-					int currTileY,
+		private static bool FindWhipUnitCollisionAt(
+					Vector2 startPos,
+					Vector2 currPos,
 					int minNpcHitWorldDistance,
-					out IEnumerable<NPC> hitNpcs,
-					out bool isPlatform ) {
+					out IEnumerable<NPC> hitNpcs ) {
 			int minNpcTileDist = minNpcHitWorldDistance >> 4;
 			int minNpcTileDistSqr = minNpcTileDist * minNpcTileDist;
-			int distX = srcTileX - currTileX;
-			int distY = srcTileY - currTileY;
-			int distXSqr = distX * distX;
-			int distYSqr = distY * distY;
+			Vector2 dist = startPos - currPos;
+			Vector2 distSqr = dist * dist;
 
-			if( (distXSqr + distYSqr) >= minNpcTileDistSqr ) {
+			if( (distSqr.X + distSqr.Y) >= minNpcTileDistSqr ) {
 				hitNpcs = Main.npc.Where( anyNpc => {
 					if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
 						return false;
 					}
 
-					int nTileX = (int)anyNpc.position.X >> 4;
-					int nTileY = (int)anyNpc.position.Y >> 4;
-
-					if( Math.Abs( nTileX - currTileX ) <= 2 && Math.Abs( nTileY - currTileY ) <= 2 ) {
-						return true;
-					}
-					return false;
+					//if( Math.Abs( nTileX - currTileX ) <= 2 && Math.Abs( nTileY - currTileY ) <= 2 ) {
+					return Vector2.DistanceSquared(anyNpc.Center, currPos) < 1024;	// 32^2
 				} );
-
-				if( hitNpcs.Count() > 0 ) {
-					isPlatform = false;
-					return true;
-				}
+			} else {
+				hitNpcs = new NPC[] { };
 			}
 
+			return hitNpcs.Count() > 0;
+		}
+
+		private static bool FindWhipTileCollisionAt( int currTileX, int currTileY, out bool isPlatform ) {
 			Tile tile = Framing.GetTileSafely( currTileX, currTileY );
-			if( tile.active() && Main.tileSolid[tile.type] ) {
-				isPlatform = !Main.tileSolidTop[tile.type];
-				hitNpcs = new List<NPC>();
-				return true;
-			}
 
-			isPlatform = false;
-			hitNpcs = new List<NPC>();
-			return false;
+			isPlatform = !Main.tileSolidTop[ tile.type ];
+			return tile.active() && Main.tileSolid[ tile.type ];
 		}
 
 
@@ -151,9 +143,17 @@ namespace Bullwhip.Items {
 			int dmg = config.WhipDamage;
 			float kb = config.WhipKnockback;
 
-			if( BullwhipConfig.Instance.IncapacitatesBats && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
-				npc.aiStyle = 16;
-				kb = 1f;
+			switch( npc.aiStyle ) {
+			case 1:     // slimes
+				break;
+			case 3:     // fighters
+				break;
+			case 14:    // bats
+				if( BullwhipConfig.Instance.IncapacitatesBats && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
+					npc.aiStyle = 16;
+					kb = 1f;
+				}
+				break;
 			}
 
 			npc.velocity += direction * kb;

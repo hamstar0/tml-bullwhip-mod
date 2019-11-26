@@ -86,7 +86,7 @@ Main.NewText("1 "+player.ownedProjectileCounts[ this.item.shoot ]);
 					}
 				} else {
 					if( !this.IsWhippingOnce && Main.mouseLeft ) {
-						BullwhipItem.AttemptWhipEnvelop( player );
+					//	BullwhipItem.AttemptWhipEnvelop( player );
 					}
 
 					this.IsWhipping = false;
