@@ -31,8 +31,8 @@ namespace Bullwhip {
 		public bool PlayerSpawnsWithWhip { get; set; } = true;
 
 
-		[DefaultValue( 64 )]
-		public int MinimumWhipDist { get; set; } = 64;
+		[DefaultValue( 48 )]
+		public int MinimumWhipDist { get; set; } = 48;
 
 		[DefaultValue( 128 )]
 		public int MaximumWhipDist { get; set; } = 128;
