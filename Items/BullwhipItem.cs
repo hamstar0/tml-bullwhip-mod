@@ -41,7 +41,7 @@ namespace Bullwhip.Items {
 			this.item.shoot = ModContent.ProjectileType<BullwhipProjectile>();
 			this.item.shootSpeed = 20f;
 			this.item.useStyle = 1;
-			this.item.useTime = 36;
+			this.item.useTime = 32;
 			this.item.useAnimation = 32;
 			this.item.width = 40;
 			this.item.height = 40;

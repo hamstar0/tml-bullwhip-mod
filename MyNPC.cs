@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HamstarHelpers.Helpers.Debug;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -68,6 +69,12 @@ namespace Bullwhip {
 				//	mynpc.IsEnraged = true;
 				//}
 				break;
+			}
+
+			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
+				if( this.IsEnraged ) {
+					Main.NewText( npc.TypeName + " enraged!" );
+				}
 			}
 		}
 	}

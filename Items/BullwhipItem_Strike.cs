@@ -74,15 +74,6 @@ namespace Bullwhip.Items {
 			BullwhipConfig config = BullwhipConfig.Instance;
 			int dmg = config.WhipDamage;
 			float kb = config.WhipKnockback;
-			
-			if( config.DebugModeStrikeInfo ) {
-				int durationTicks = 20;
-				DrawHelpers.AddPostDrawTilesAction( () => {
-					Vector2 pos = hitWorldPosition - Main.screenPosition;
-					HUDHelpers.DrawBorderedRect( Main.spriteBatch, null, Color.Red, pos, new Vector2(32), 2 );
-					return durationTicks-- > 0;
-				} );
-			}
 
 			switch( npc.aiStyle ) {
 			case 1:     // slimes
@@ -140,16 +131,34 @@ namespace Bullwhip.Items {
 
 		public static bool IsHeadshot( NPC npc, Vector2 targetPoint ) {
 			Rectangle rect = npc.getRect();
-			rect.X -= rect.Width / 4;
-			rect.Width += rect.Width / 2;
-			rect.Height /= 3;
+			rect.X -= rect.Width;
+			rect.Y -= rect.Height / 3;
+			rect.Width += 2 * rect.Width;
+			rect.Height /= 2;
+
+			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
+				Dust.QuickBox(
+					new Vector2( targetPoint.X-2, targetPoint.Y-2 ),
+					new Vector2( targetPoint.X+2, targetPoint.Y+2 ),
+					2,
+					Color.Purple,
+					d => { }
+				);
+				Dust.QuickBox(
+					new Vector2(rect.X, rect.Y),
+					new Vector2(rect.X+rect.Width, rect.Y+rect.Height),
+					2,
+					Color.Red,
+					d => { }
+				);
+			}
 
 			return rect.Contains( (int)targetPoint.X, (int)targetPoint.Y );
 		}
 
 		public static void ApplyHeadshot( NPC npc ) {
 			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
-			int tickDuration = 60 * rand.Next(4, 16);
+			int tickDuration = 60 * rand.Next(4, 9);
 
 			npc.AddBuff( BuffID.Confused, tickDuration );
 		}

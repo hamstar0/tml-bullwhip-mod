@@ -1,8 +1,5 @@
-# Better Paint
+# Bullwhip
 
-Improves the paint function of the game by adding a spray applicator, letting you paint with smooth, fast, full-RGB color across your world. Configurable.
+Provides a bullwhip. Good for slapping enemies around. Especially bats. May do a few other tricky things as well. Configurable.
 
-Additional credits:
-* dekrypt - Paint Mixer sprite
-
-https://forums.terraria.org/index.php?threads/better-paint-make-the-world-your-canvas.69884/
+https://github.com/hamstar0/tml-bullwhip-mod

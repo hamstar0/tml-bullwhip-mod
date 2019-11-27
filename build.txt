@@ -3,4 +3,4 @@ author = hamstar
 version = 0.8.0
 modReferences = HamstarHelpers@5.4.0
 buildIgnore = *.csproj, *.user, *.bat, obj\*, bin\*, .vs\*, .git\*
-homepage = https://github.com/hamstar0/tml-staffofgaia-mod
+homepage = https://github.com/hamstar0/tml-bullwhip-mod
