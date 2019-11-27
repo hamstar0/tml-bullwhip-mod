@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace Bullwhip {
 	class BullwhipPlayer : ModPlayer {
-		public Vector2? PullHeading { get; internal set; } = null;
+		private Vector2? PullHeading = null;
 
 		////
 
@@ -51,6 +51,18 @@ namespace Bullwhip {
 				this.player.velocity -= this.PullHeading.Value * BullwhipConfig.Instance.WhipLedgePullStrength;
 				this.PullHeading = null;
 			}
+		}
+
+
+		////////////////
+
+		public void SetPullHeading( Vector2 pullHeading ) {
+			if( pullHeading.LengthSquared() > 9216 ) {  //96^2
+				pullHeading.Normalize();
+				pullHeading *= 96;
+			}
+
+			this.PullHeading = pullHeading;
 		}
 	}
 }

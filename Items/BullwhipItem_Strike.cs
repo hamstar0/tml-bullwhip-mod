@@ -1,7 +1,11 @@
 using HamstarHelpers.Helpers.Debug;
+using HamstarHelpers.Helpers.DotNET.Extensions;
+using HamstarHelpers.Helpers.Draw;
+using HamstarHelpers.Helpers.HUD;
 using HamstarHelpers.Helpers.TModLoader;
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -10,6 +14,58 @@ using Terraria.Utilities;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
+		public static void ApplyWhipStrike(
+					Player player,
+					Vector2 start,
+					Vector2 direction,
+					IDictionary<int, ISet<int>> breakables,
+					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
+					int platformHitX,
+					int platformHitY ) {
+			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
+			Vector2 maxPos = start + (direction * maxWhipDist);
+
+			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
+				Dust.QuickDust( maxPos, Color.Red );
+			}
+
+			foreach( (int tileX, ISet<int> tileYs) in breakables ) {
+				foreach( int tileY in tileYs ) {
+					WorldGen.KillTile( tileX, tileY );
+				}
+			}
+			
+			bool isNpcHit = false;
+			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
+				foreach( NPC npc in npcs ) {
+					isNpcHit = true;
+					BullwhipItem.Strike( player, direction, target, npc );
+				}
+			}
+
+			bool isProjHit = false;
+			foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
+				foreach( Projectile proj in projs ) {
+					isProjHit = true;
+					BullwhipItem.Strike( player, direction, target, proj );
+				}
+			}
+
+			if( !isNpcHit ) {
+				if( platformHitX != -1 ) {
+					BullwhipItem.GrabPlatform( player, platformHitX, platformHitY );
+				}
+			}
+
+			if( !isNpcHit && platformHitX == -1 ) {
+				BullwhipItem.CreateHitFx( maxPos, false );
+			}
+		}
+
+
+		////////////////
+
 		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, NPC npc ) {
 			if( npc.immortal ) {
 				return;
@@ -18,6 +74,15 @@ namespace Bullwhip.Items {
 			BullwhipConfig config = BullwhipConfig.Instance;
 			int dmg = config.WhipDamage;
 			float kb = config.WhipKnockback;
+			
+			if( config.DebugModeStrikeInfo ) {
+				int durationTicks = 20;
+				DrawHelpers.AddPostDrawTilesAction( () => {
+					Vector2 pos = hitWorldPosition - Main.screenPosition;
+					HUDHelpers.DrawBorderedRect( Main.spriteBatch, null, Color.Red, pos, new Vector2(32), 2 );
+					return durationTicks-- > 0;
+				} );
+			}
 
 			switch( npc.aiStyle ) {
 			case 1:     // slimes
@@ -45,8 +110,8 @@ namespace Bullwhip.Items {
 
 		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, Projectile proj ) {
 			BullwhipConfig config = BullwhipConfig.Instance;
-			int dmg = config.WhipDamage;
-			float kb = config.WhipKnockback;
+			//int dmg = config.WhipDamage;
+			//float kb = config.WhipKnockback;
 
 			float speed = proj.velocity.Length();
 			direction.Normalize();
@@ -99,7 +164,7 @@ namespace Bullwhip.Items {
 			bi.SoundInstance?.Stop();
 
 			var myplayer = player.GetModPlayer<BullwhipPlayer>();
-			myplayer.PullHeading = player.Center - target;
+			myplayer.SetPullHeading( player.Center - target );
 
 			Main.PlaySound( SoundID.Dig, target );
 		}

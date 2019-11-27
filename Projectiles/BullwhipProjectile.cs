@@ -128,7 +128,7 @@ namespace Bullwhip.Projectiles {
 				}
 
 				if( proj.frame == 4 ) {
-					var sndPos = proj.position;
+					var sndPos = proj.Center;
 					sndPos += Vector2.Normalize(proj.velocity) * BullwhipConfig.Instance.MaximumWhipDist;
 
 					BullwhipItem.PlaySound( sndPos );

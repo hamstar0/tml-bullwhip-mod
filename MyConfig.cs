@@ -23,6 +23,9 @@ namespace Bullwhip {
 
 		////////////////
 
+		public bool DebugModeStrikeInfo { get; set; } = false;
+
+
 		[DefaultValue( true )]
 		public bool RecipeEnabled { get; set; } = true;
 
@@ -31,7 +34,7 @@ namespace Bullwhip {
 		public bool PlayerSpawnsWithWhip { get; set; } = true;
 
 
-		[DefaultValue( 144 )]
+		[DefaultValue( 128 )]
 		public int MinimumWhipDist { get; set; } = 144;
 
 		[DefaultValue( 192 )]
