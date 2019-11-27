@@ -1,5 +1,6 @@
 using Bullwhip.Projectiles;
 using Bullwhip.Recipes;
+using Microsoft.Xna.Framework.Audio;
 using System;
 using Terraria;
 using Terraria.ID;
@@ -10,6 +11,8 @@ namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		private bool IsWhipping = false;
 		private bool IsWhippingOnce = false;
+
+		private SoundEffectInstance SoundInstance = null;
 
 
 		////////////////

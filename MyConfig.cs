@@ -31,11 +31,11 @@ namespace Bullwhip {
 		public bool PlayerSpawnsWithWhip { get; set; } = true;
 
 
-		[DefaultValue( 112 )]
-		public int MinimumWhipDist { get; set; } = 112;
+		[DefaultValue( 144 )]
+		public int MinimumWhipDist { get; set; } = 144;
 
-		[DefaultValue( 128 )]
-		public int MaximumWhipDist { get; set; } = 128;
+		[DefaultValue( 192 )]
+		public int MaximumWhipDist { get; set; } = 192;
 
 		[DefaultValue( 15 )]
 		public int WhipDamage { get; set; } = 15;
@@ -47,6 +47,12 @@ namespace Bullwhip {
 
 		[DefaultValue( true )]
 		public bool IncapacitatesBats { get; set; } = true;
+
+
+		[DefaultValue( 0.1f )]
+		[Range( 0f, 0.5f )]
+		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
+		public float WhipLedgePullStrength { get; set; } = 0.1f;
 		
 
 

@@ -56,6 +56,12 @@ namespace Bullwhip {
 				npc.SetDefaults( NPCID.SpikedIceSlime );
 				this.IsEnraged = true;
 				break;
+			case NPCID.BlackSlime:
+				// ?
+				break;
+			case NPCID.MotherSlime:
+				// ?
+				break;
 			case NPCID.Pinky:
 				//if( rand.Next( 4 ) == 0 ) {
 				//	npc.SetDefaults( NPCID.Gastropod );	<- Drops Blessed Apple

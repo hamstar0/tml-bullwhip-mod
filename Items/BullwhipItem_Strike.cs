@@ -71,5 +71,17 @@ namespace Bullwhip.Items {
 
 			npc.AddBuff( BuffID.Confused, tickDuration );
 		}
+
+
+		////////////////
+
+		public static void GrabPlatform( Player player, int tileX, int tileY ) {
+			var bi = ModContent.GetInstance<BullwhipItem>();
+
+			bi.SoundInstance?.Stop();
+
+			var myplayer = player.GetModPlayer<BullwhipPlayer>();
+			myplayer.PullHeading = player.Center - new Vector2(tileX<<4, tileY<<4);
+		}
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using Bullwhip.Items;
-using HamstarHelpers.Helpers.DotNET.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -29,7 +28,7 @@ namespace Bullwhip.Projectiles {
 		}
 
 		public override void SetDefaults() {
-			this.projectile.width = 256;
+			this.projectile.width = 384;
 			this.projectile.height = 72;
 			this.projectile.aiStyle = -1;   // = 19;
 			this.projectile.penetrate = -1;

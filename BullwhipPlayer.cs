@@ -1,4 +1,5 @@
 ﻿using Bullwhip.Items;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -6,7 +7,11 @@ using Terraria.ModLoader;
 
 
 namespace Bullwhip {
-	class MyPlayer : ModPlayer {
+	class BullwhipPlayer : ModPlayer {
+		public Vector2? PullHeading { get; internal set; } = null;
+
+		////
+
 		public override bool CloneNewInstances => false;
 
 
@@ -36,6 +41,15 @@ namespace Bullwhip {
 
 			if( (whip?.active ?? false) && whip.type == ModContent.ItemType<BullwhipItem>() ) {
 				((BullwhipItem)whip.modItem)?.UpdateWhip( this.player );
+			}
+		}
+
+		////////////////
+
+		public override void PreUpdateMovement() {
+			if( this.PullHeading.HasValue ) {
+				this.player.velocity -= this.PullHeading.Value * BullwhipConfig.Instance.WhipLedgePullStrength;
+				this.PullHeading = null;
 			}
 		}
 	}

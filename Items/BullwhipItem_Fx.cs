@@ -8,8 +8,10 @@ using Terraria.ModLoader;
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		public static void PlaySound( Vector2 pos ) {
+			var bi = ModContent.GetInstance<BullwhipItem>();
+
 			int soundSlot = BullwhipMod.Instance.GetSoundSlot( SoundType.Custom, "Sounds/Custom/BullwhipCrackSound" );
-			Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.5f );
+			bi.SoundInstance = Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.5f );
 		}
 
 		public static void CreateHitFx( Vector2 pos, bool isNpc ) {

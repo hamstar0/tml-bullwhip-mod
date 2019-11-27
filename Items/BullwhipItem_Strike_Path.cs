@@ -22,7 +22,7 @@ namespace Bullwhip.Items {
 			int endTileX = (int)maxPos.X >> 4;
 			int endTileY = (int)maxPos.Y >> 4;
 
-			bool isTileHit = false;
+			int platformHitX = -1, platformHitY = -1;
 			IDictionary<Vector2, IEnumerable<NPC>> hitNpcAt = new Dictionary<Vector2, IEnumerable<NPC>>();
 
 			///
@@ -36,28 +36,42 @@ namespace Bullwhip.Items {
 				return false;
 			};
 
-			Func<int, int, bool> checkPerTile = (currTileX, currTileY) => {
-				bool isPlatform;
-				if( BullwhipItem.FindWhipTileCollisionAt(currTileX, currTileY, out isPlatform) && !isPlatform ) {
+			Func<int, int, bool> checkPerNonPlatformTile = (currTileX, currTileY) => {
+				bool isTileHit = false, isPlatformHit;
+
+				if( BullwhipItem.FindWhipTileCollisionAt(currTileX, currTileY, out isPlatformHit) ) {
 					isTileHit = true;
 					endTileX = currTileX;
 					endTileY = currTileY;
-					return true;
 				}
-				return false;
+
+				if( isPlatformHit && platformHitX == -1 ) {
+					platformHitX = currTileX;
+					platformHitY = currTileY;
+				}
+
+				return isTileHit;
 			};
 
 			///
 
-			CollisionHelpers.CastRay( plrCenter, direction, maxWhipDist, checkPerUnit, checkPerTile );
+			CollisionHelpers.CastRay( plrCenter, direction, maxWhipDist, checkPerUnit, checkPerNonPlatformTile );
 
+			bool isNpcHit = false;
 			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcAt ) {
 				foreach( NPC npc in npcs ) {
+					isNpcHit = true;
 					BullwhipItem.Strike( player, direction, target, npc );
 				}
 			}
 
-			if( isTileHit ) {
+			if( !isNpcHit ) {
+				if( platformHitX != -1 ) {
+					BullwhipItem.GrabPlatform( player, platformHitX, platformHitY );
+				}
+			}
+
+			if( !isNpcHit && platformHitX == -1 ) {
 				BullwhipItem.CreateHitFx( new Vector2(endTileX<<4, endTileY<<4), false );
 			}
 		}
@@ -93,9 +107,9 @@ namespace Bullwhip.Items {
 
 		private static bool FindWhipTileCollisionAt( int currTileX, int currTileY, out bool isPlatform ) {
 			Tile tile = Framing.GetTileSafely( currTileX, currTileY );
+			isPlatform = Main.tileSolidTop[tile.type];
 
-			isPlatform = !Main.tileSolidTop[ tile.type ];
-			return tile.active() && Main.tileSolid[ tile.type ];
+			return tile.active() && Main.tileSolid[ tile.type ] && !isPlatform;
 		}
 	}
 }
