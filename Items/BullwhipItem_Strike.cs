@@ -43,6 +43,23 @@ namespace Bullwhip.Items {
 		}
 
 
+		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, Projectile proj ) {
+			BullwhipConfig config = BullwhipConfig.Instance;
+			int dmg = config.WhipDamage;
+			float kb = config.WhipKnockback;
+
+			float speed = proj.velocity.Length();
+			direction.Normalize();
+			proj.velocity.Normalize();
+
+			proj.velocity = Vector2.Normalize( direction + proj.velocity );
+			proj.velocity *= speed;
+
+			BullwhipItem.CreateHitFx( proj.Center, false );
+			BullwhipItem.CreateHitFx( proj.Center, false );
+		}
+
+
 		////////////////
 
 		public static void ApplySlimeshot( NPC npc ) {
@@ -77,11 +94,14 @@ namespace Bullwhip.Items {
 
 		public static void GrabPlatform( Player player, int tileX, int tileY ) {
 			var bi = ModContent.GetInstance<BullwhipItem>();
+			var target = new Vector2( tileX << 4, tileY << 4 );
 
 			bi.SoundInstance?.Stop();
 
 			var myplayer = player.GetModPlayer<BullwhipPlayer>();
-			myplayer.PullHeading = player.Center - new Vector2(tileX<<4, tileY<<4);
+			myplayer.PullHeading = player.Center - target;
+
+			Main.PlaySound( SoundID.Dig, target );
 		}
 	}
 }

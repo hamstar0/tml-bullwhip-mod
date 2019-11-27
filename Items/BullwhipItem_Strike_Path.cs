@@ -4,64 +4,57 @@ using HamstarHelpers.Helpers.DotNET.Extensions;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
-		public static void AttemptWhipStrike( Player player, Vector2 direction ) {
+		public static void CastWhipStrike( Player player, Vector2 direction ) {
 			int minWhipDist = BullwhipConfig.Instance.MinimumWhipDist;
 			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
 			direction.Normalize();
 			
 			Vector2 plrCenter = player.RotatedRelativePoint( player.MountedCenter, true );
 			Vector2 maxPos = plrCenter + (direction * maxWhipDist);
-
+			
 			int endTileX = (int)maxPos.X >> 4;
 			int endTileY = (int)maxPos.Y >> 4;
 
-			int platformHitX = -1, platformHitY = -1;
-			IDictionary<Vector2, IEnumerable<NPC>> hitNpcAt = new Dictionary<Vector2, IEnumerable<NPC>>();
+			int platformHitX, platformHitY;
+			IDictionary<int, ISet<int>> breakables = new Dictionary<int, ISet<int>>();
+			IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt = new Dictionary<Vector2, IEnumerable<NPC>>();
+			IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt = new Dictionary<Vector2, IEnumerable<Projectile>>();
 
 			///
 
-			Func<Vector2, bool> checkPerUnit = (wldPos) => {
-				IEnumerable<NPC> hitNpcs = null;
-				if( BullwhipItem.FindWhipUnitCollisionAt( plrCenter, wldPos, minWhipDist, out hitNpcs ) ) {
-					hitNpcAt[wldPos] = hitNpcs;
-					return true;
-				}
-				return false;
-			};
-
-			Func<int, int, bool> checkPerNonPlatformTile = (currTileX, currTileY) => {
-				bool isTileHit = false, isPlatformHit;
-
-				if( BullwhipItem.FindWhipTileCollisionAt(currTileX, currTileY, out isPlatformHit) ) {
-					isTileHit = true;
-					endTileX = currTileX;
-					endTileY = currTileY;
-				}
-
-				if( isPlatformHit && platformHitX == -1 ) {
-					platformHitX = currTileX;
-					platformHitY = currTileY;
-				}
-
-				return isTileHit;
-			};
+			bool tileHit = BullwhipItem.CastWhipScanRay(
+				plrCenter,
+				direction,
+				minWhipDist,
+				out platformHitX,
+				out platformHitY,
+				breakables,
+				hitNpcsAt,
+				hitProjsAt
+			);
 
 			///
 
-			CollisionHelpers.CastRay( plrCenter, direction, maxWhipDist, checkPerUnit, checkPerNonPlatformTile );
-
+			BullwhipItem.ApplyWhipStrike();
 			bool isNpcHit = false;
-			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcAt ) {
+			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
 				foreach( NPC npc in npcs ) {
 					isNpcHit = true;
 					BullwhipItem.Strike( player, direction, target, npc );
+				}
+			}
+
+			bool isProjHit = false;
+			foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
+				foreach( Projectile proj in projs ) {
+					isProjHit = true;
+					BullwhipItem.Strike( player, direction, target, proj );
 				}
 			}
 
@@ -77,39 +70,93 @@ namespace Bullwhip.Items {
 		}
 
 
-		////
+		private static bool CastWhipScanRay(
+					Vector2 start,
+					Vector2 direction,
+					int minDist,
+					out int hitPlatformX,
+					out int hitPlatformY,
+					IDictionary<int, ISet<int>> breakables,
+					IDictionary<Vector2, IEnumerable<NPC>> hitNpcAt,
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjAt ) {
+			int firstPlatformX = -1;
+			int firstPlatformY = -1;
 
-		private static bool FindWhipUnitCollisionAt(
-					Vector2 startPos,
-					Vector2 currPos,
-					int minNpcHitWorldDistance,
-					out IEnumerable<NPC> hitNpcsAt ) {
-			int minNpcTileDist = minNpcHitWorldDistance >> 4;
-			int minNpcTileDistSqr = minNpcTileDist * minNpcTileDist;
-			Vector2 dist = startPos - currPos;
-			Vector2 distSqr = dist * dist;
+			bool checkPerUnit( Vector2 wldPos ) {
+				bool hit = BullwhipItem.CheckNpcCollisionPerUnit( start, wldPos, minDist, hitNpcAt );
+				hit |= BullwhipItem.CheckProjCollisionPerUnit( start, wldPos, minDist, hitProjAt );
+				return hit;
+			};
 
-			if( (distSqr.X + distSqr.Y) >= minNpcTileDistSqr ) {
-				hitNpcsAt = Main.npc.Where( anyNpc => {
-					if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
-						return false;
-					}
+			bool checkPerNonPlatformTile( int tileX, int tileY ) {
+				bool isPlatform, isBreakable;
+				bool isTile = BullwhipItem.FindWhipTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
 
-					//if( Math.Abs( nTileX - currTileX ) <= 2 && Math.Abs( nTileY - currTileY ) <= 2 ) {
-					return Vector2.DistanceSquared(anyNpc.Center, currPos) < 1024;	// 32^2
-				} );
-			} else {
-				hitNpcsAt = new NPC[] { };
-			}
+				if( isPlatform && firstPlatformX != -1 ) {
+					firstPlatformX = tileX;
+					firstPlatformY = tileY;
+				}
+				if( isBreakable ) {
+					breakables.Set2D( tileX, tileY );
+				}
+				return isTile;
+			};
 
-			return hitNpcsAt.Count() > 0;
+			///
+
+			hitPlatformX = (int)firstPlatformX;
+			hitPlatformY = (int)firstPlatformY;
+
+			///
+
+			return CollisionHelpers.CastRay(
+				start,
+				direction,
+				minDist,
+				checkPerUnit,
+				checkPerNonPlatformTile
+			);
 		}
 
-		private static bool FindWhipTileCollisionAt( int currTileX, int currTileY, out bool isPlatform ) {
-			Tile tile = Framing.GetTileSafely( currTileX, currTileY );
-			isPlatform = Main.tileSolidTop[tile.type];
 
-			return tile.active() && Main.tileSolid[ tile.type ] && !isPlatform;
+		////////////////
+
+		public static bool CheckNpcCollisionPerUnit(
+					Vector2 from,
+					Vector2 to,
+					int minDist,
+					IDictionary<Vector2, IEnumerable<NPC>> hitNpcAt ) {
+			IEnumerable<NPC> hitNpcs = null;
+
+			if( BullwhipItem.FindWhipNpcCollisionAt( from, to, minDist, out hitNpcs ) ) {
+				hitNpcAt[to] = hitNpcs;
+				return true;
+			}
+			return false;
+		}
+		
+
+		public static bool CheckProjCollisionPerUnit(
+					Vector2 beg,
+					Vector2 end,
+					int minDist,
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjAt ) {
+			IEnumerable<Projectile> hitProjs = null;
+
+			if( BullwhipItem.FindWhipProjectileCollisionAt( beg, end, minDist, out hitProjs ) ) {
+				hitProjAt[end] = hitProjs;
+				return true;
+			}
+			return false;
+		}
+
+
+		public static bool CheckCollisionPerTile(
+					int tileX,
+					int tileY,
+					out bool isPlatformHit,
+					out bool isBreakable ) {
+			return BullwhipItem.FindWhipTileCollisionAt( tileX, tileY, out isPlatformHit, out isBreakable );
 		}
 	}
 }

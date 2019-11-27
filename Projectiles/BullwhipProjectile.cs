@@ -69,7 +69,7 @@ namespace Bullwhip.Projectiles {
 				}
 			} else {
 				if( this.projectile.timeLeft == 1 ) {
-					BullwhipItem.AttemptWhipStrike( ownerPlr, this.projectile.velocity );
+					BullwhipItem.CastWhipStrike( ownerPlr, this.projectile.velocity );
 				}
 			}
 		}
