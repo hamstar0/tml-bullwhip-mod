@@ -1,7 +1,5 @@
 using HamstarHelpers.Helpers.Debug;
 using HamstarHelpers.Helpers.DotNET.Extensions;
-using HamstarHelpers.Helpers.Draw;
-using HamstarHelpers.Helpers.HUD;
 using HamstarHelpers.Helpers.TModLoader;
 using Microsoft.Xna.Framework;
 using System;
@@ -18,11 +16,11 @@ namespace Bullwhip.Items {
 					Player player,
 					Vector2 start,
 					Vector2 direction,
+					(int TileX, int TileY)? hitTileAt,
+					(int TileX, int TileY)? hitPlatformAt,
 					IDictionary<int, ISet<int>> breakables,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
-					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
-					int platformHitX,
-					int platformHitY ) {
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
 			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
 			Vector2 maxPos = start + (direction * maxWhipDist);
 
@@ -53,13 +51,19 @@ namespace Bullwhip.Items {
 			}
 
 			if( !isNpcHit ) {
-				if( platformHitX != -1 ) {
-					BullwhipItem.GrabPlatform( player, platformHitX, platformHitY );
+				if( hitPlatformAt.HasValue ) {
+					BullwhipItem.GrabPlatform( player, hitPlatformAt.Value.TileX, hitPlatformAt.Value.TileY );
 				}
 			}
 
-			if( !isNpcHit && platformHitX == -1 ) {
-				BullwhipItem.CreateHitFx( maxPos, false );
+			if( !isNpcHit ) {
+				if( !hitTileAt.HasValue && !hitPlatformAt.HasValue ) {
+					BullwhipItem.CreateHitFx( maxPos, false );
+				} else if( hitPlatformAt.HasValue ) {
+					BullwhipItem.CreateHitFx( hitPlatformAt.Value.ToVector2() * 16f, false );
+				} else if( hitTileAt.HasValue ) {
+					BullwhipItem.CreateHitFx( hitTileAt.Value.ToVector2() * 16f, false );
+				}
 			}
 		}
 

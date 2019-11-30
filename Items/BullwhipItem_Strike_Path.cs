@@ -21,36 +21,37 @@ namespace Bullwhip.Items {
 				Dust.QuickDust( start, Color.Lime );
 			}
 
-			int platformHitX, platformHitY;
+			(int TileX, int TileY)? hitTileAt;
+			(int TileX, int TileY)? hitPlatformAt;
 			IDictionary<int, ISet<int>> breakables = new Dictionary<int, ISet<int>>();
 			IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt = new Dictionary<Vector2, IEnumerable<NPC>>();
 			IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt = new Dictionary<Vector2, IEnumerable<Projectile>>();
 
 			///
 
-			bool tileHit = BullwhipItem.CastWhipScanRay(
-				start,
-				direction,
-				minWhipDist,
-				maxWhipDist,
-				out platformHitX,
-				out platformHitY,
-				breakables,
-				hitNpcsAt,
-				hitProjsAt
+			bool hitAnything = BullwhipItem.CastWhipScanRay(
+				start: start,
+				direction: direction,
+				minDist: minWhipDist,
+				maxDist: maxWhipDist,
+				hitTileAt: out hitTileAt,
+				hitPlatformAt: out hitPlatformAt,
+				breakables: breakables,
+				hitNpcsAt: hitNpcsAt,
+				hitProjsAt: hitProjsAt
 			);
 
 			///
 
 			BullwhipItem.ApplyWhipStrike(
-				player,
-				start,
-				direction,
-				breakables,
-				hitNpcsAt,
-				hitProjsAt,
-				platformHitX,
-				platformHitY
+				player: player,
+				start: start,
+				direction: direction,
+				breakables: breakables,
+				hitTileAt: hitTileAt,
+				hitPlatformAt: hitPlatformAt,
+				hitNpcsAt: hitNpcsAt,
+				hitProjsAt: hitProjsAt
 			);
 		}
 
@@ -61,46 +62,52 @@ namespace Bullwhip.Items {
 					Vector2 direction,
 					int minDist,
 					int maxDist,
-					out int hitPlatformX,
-					out int hitPlatformY,
+					out (int TileX, int TileY)? hitTileAt,
+					out (int TileX, int TileY)? hitPlatformAt,
 					IDictionary<int, ISet<int>> breakables,
-					IDictionary<Vector2, IEnumerable<NPC>> hitNpcAt,
-					IDictionary<Vector2, IEnumerable<Projectile>> hitProjAt ) {
-			int firstPlatformX = -1;
-			int firstPlatformY = -1;
+					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
+			(int TileX, int TileY)? myHitTileAt = null;
+			(int TileX, int TileY)? myHitPlatformAt = null;
 
 			bool checkPerUnit( Vector2 wldPos ) {
-				return BullwhipItem.CheckCollisionPerUnit( start, wldPos, minDist, hitNpcAt, hitProjAt );
+				return BullwhipItem.CheckCollisionPerUnit( start, wldPos, minDist, hitNpcsAt, hitProjsAt );
 			};
 
 			bool checkPerTile( int tileX, int tileY ) {
-				bool isPlatform, isBreakable;
-				bool isTile = BullwhipItem.FindWhipTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
+				bool isTile, isPlatform, isBreakable;
+				isTile = BullwhipItem.FindWhipTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
 
-				if( isPlatform && firstPlatformX == -1 ) {
-					firstPlatformX = tileX;
-					firstPlatformY = tileY;
+				if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
+					Dust.QuickDust( new Point(tileX, tileY), isTile ? Color.Red : Color.Lime );
+				}
+
+				if( isTile ) {
+					myHitTileAt = (tileX, tileY);
+				}
+				if( isPlatform && !myHitPlatformAt.HasValue ) {
+					myHitPlatformAt = (tileX, tileY);
 				}
 				if( isBreakable ) {
 					breakables.Set2D( tileX, tileY );
 				}
+
 				return isTile;
 			};
 
 			///
 
-			hitPlatformX = (int)firstPlatformX;
-			hitPlatformY = (int)firstPlatformY;
-
-			///
-
-			return CollisionHelpers.CastRay(
+			bool found = CollisionHelpers.CastRay(
 				start,
 				direction,
 				maxDist,
 				checkPerUnit,
 				checkPerTile
 			);
+
+			hitPlatformAt = myHitPlatformAt;
+			hitTileAt = myHitTileAt;
+			return found;
 		}
 
 
