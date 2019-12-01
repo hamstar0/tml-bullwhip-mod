@@ -1,10 +1,10 @@
 using HamstarHelpers.Helpers.Debug;
+using HamstarHelpers.Helpers.Tiles;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.Enums;
 using Terraria.ModLoader;
 
 
@@ -38,13 +38,31 @@ namespace Bullwhip.Items {
 
 			if( isActive ) {
 				isPlatform = Main.tileSolidTop[tile.type];
-				isBreakable = Main.tileCut[tile.type] && WorldGen.CanCutTile(tileX, tileY, TileCuttingContext.AttackMelee);
+				isBreakable = TileAttributeHelpers.IsBreakable( tileX, tileY );
 			} else {
 				isPlatform = false;
 				isBreakable = false;
 			}
 
 			return isActive && Main.tileSolid[tile.type] && !isPlatform;
+		}
+
+		private static IEnumerable<(int TileX, int TileY)> FindNearbyBreakableTiles( int tileX, int tileY ) {
+			if( TileAttributeHelpers.IsBreakable(tileX, tileY) ) {
+				yield return (tileX, tileY);
+			}
+			if( TileAttributeHelpers.IsBreakable(tileX - 1, tileY) ) {
+				yield return (tileX - 1, tileY);
+			}
+			if( TileAttributeHelpers.IsBreakable(tileX + 1, tileY) ) {
+				yield return (tileX + 1, tileY);
+			}
+			if( TileAttributeHelpers.IsBreakable(tileX, tileY - 1) ) {
+				yield return (tileX, tileY - 1);
+			}
+			if( TileAttributeHelpers.IsBreakable(tileX, tileY + 1) ) {
+				yield return (tileX, tileY + 1);
+			}
 		}
 	}
 }

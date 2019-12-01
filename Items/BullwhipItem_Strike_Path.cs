@@ -77,6 +77,12 @@ namespace Bullwhip.Items {
 			bool checkPerTile( int tileX, int tileY ) {
 				bool isTile, isPlatform, isBreakable;
 				isTile = BullwhipItem.FindWhipTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
+				IEnumerable<(int TileX, int TileY)> myBreakables = BullwhipItem.FindNearbyBreakableTiles( tileX, tileY );
+
+				// Account for adjacent breakable tiles
+				foreach( var xy in myBreakables ) {
+					breakables.Set2D( xy.TileX, xy.TileY );
+				}
 
 				if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 					Dust.QuickDust( new Point(tileX, tileY), isTile ? Color.Red : Color.Lime );
@@ -89,6 +95,7 @@ namespace Bullwhip.Items {
 					myHitPlatformAt = (tileX, tileY);
 				}
 				if( isBreakable ) {
+					isTile = false;
 					breakables.Set2D( tileX, tileY );
 				}
 
