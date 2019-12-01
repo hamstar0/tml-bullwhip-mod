@@ -59,11 +59,11 @@ namespace Bullwhip.Items {
 
 			if( !isNpcHit ) {
 				if( !hitTileAt.HasValue && !hitPlatformAt.HasValue ) {
-					BullwhipItem.CreateHitFx( maxPos, false );
+					BullwhipItem.CreateHitAirFx( maxPos );
 				} else if( hitPlatformAt.HasValue ) {
-					BullwhipItem.CreateHitFx( hitPlatformAt.Value.ToVector2() * 16f, false );
+					BullwhipItem.CreateHitSolidFx( hitPlatformAt.Value.ToVector2() * 16f );
 				} else if( hitTileAt.HasValue ) {
-					BullwhipItem.CreateHitFx( hitTileAt.Value.ToVector2() * 16f, false );
+					BullwhipItem.CreateHitSolidFx( hitTileAt.Value.ToVector2() * 16f );
 				}
 			}
 		}
@@ -110,7 +110,7 @@ namespace Bullwhip.Items {
 				}
 			}
 
-			BullwhipItem.CreateHitFx( npc.Center, true );
+			BullwhipItem.CreateHitEntityFx( npc.Center );
 		}
 
 
@@ -126,8 +126,8 @@ namespace Bullwhip.Items {
 			proj.velocity = Vector2.Normalize( direction + proj.velocity );
 			proj.velocity *= speed;
 
-			BullwhipItem.CreateHitFx( proj.Center, false );
-			BullwhipItem.CreateHitFx( proj.Center, false );
+			BullwhipItem.CreateHitEntityFx( proj.Center );
+			BullwhipItem.CreateHitEntityFx( proj.Center );
 		}
 
 

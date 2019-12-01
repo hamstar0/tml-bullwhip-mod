@@ -14,33 +14,58 @@ namespace Bullwhip.Items {
 			bi.SoundInstance = Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.5f );
 		}
 
-		public static void CreateHitFx( Vector2 pos, bool isNpc ) {
-			Color color = isNpc ? Color.Lerp(Color.Red, Color.White, 0.5f) : Color.White;
-			int alpha = isNpc ? 128 : 192;
-			float scale = 0.75f;
+
+		////////////////
+
+		public static void CreateHitAirFx( Vector2 pos ) {
+			BullwhipItem.CreateHitFx(
+				pos: pos,
+				dustType: 31,
+				count: 6,
+				color: Color.White,
+				alpha: 192,
+				scale: 0.75f,
+				fadeIn: 3f
+			);
+		}
+		
+		public static void CreateHitSolidFx( Vector2 pos ) {
+			BullwhipItem.CreateHitFx(
+				pos: pos,
+				dustType: 1,
+				count: 5,
+				color: Color.White,
+				alpha: 0,
+				scale: 1.25f,
+				fadeIn: 1f
+			);
+		}
+
+		public static void CreateHitEntityFx( Vector2 pos ) {
+			BullwhipItem.CreateHitFx(
+				pos: pos,
+				dustType: 31,
+				count: 6,
+				color: Color.Lerp(Color.Red, Color.White, 0.5f ),
+				alpha: 128,
+				scale: 0.75f,
+				fadeIn: 3f
+			);
+		}
+
+		////
+
+		private static void CreateHitFx( Vector2 pos, int dustType, int count, Color color, int alpha, float scale, float fadeIn ) {
 			int width = 16;
 			pos.X -= width / 2;
 			pos.Y -= width / 2;
 
-			Dust dust;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
-			dust = Main.dust[Dust.NewDust( pos, width, width, 31, 0f, 0f, alpha, color, scale )];
-			dust.noGravity = true;
-			dust.fadeIn = 3f;
+			for( int i=0; i<count; i++ ) {
+				Dust dust;
+				dust = Main.dust[ Dust.NewDust( pos, width, width, dustType, 0f, 0f, alpha, color, scale ) ];
+				dust.noGravity = true;
+				dust.fadeIn = fadeIn;
+			}
 		}
 	}
 }

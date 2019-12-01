@@ -11,21 +11,27 @@ using Terraria.ModLoader;
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		private static IEnumerable<NPC> FindWhipNpcCollisionAt( Vector2 wldPos ) {
+			int npcRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
+			npcRadiusSqr *= npcRadiusSqr;
+
 			return Main.npc.Where( anyNpc => {
 				if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
 					return false;
 				}
-				return Vector2.DistanceSquared(anyNpc.Center, wldPos) < 1024;	// 32^2
+				return Vector2.DistanceSquared(anyNpc.Center, wldPos) < npcRadiusSqr;
 			} );
 		}
 		
 
 		private static IEnumerable<Projectile> FindWhipProjectileCollisionAt( Vector2 wldPos ) {
+			int projRadiusSqr = BullwhipConfig.Instance.WhipProjectileHitRadius;
+			projRadiusSqr *= projRadiusSqr;
+
 			return Main.projectile.Where( anyProj => {
 				if( anyProj == null || !anyProj.active || !anyProj.hostile ) {
 					return false;
 				}
-				return Vector2.DistanceSquared(anyProj.Center, wldPos) < 1024;	// 32^2
+				return Vector2.DistanceSquared(anyProj.Center, wldPos) < projRadiusSqr;
 			} );
 		}
 
@@ -37,7 +43,7 @@ namespace Bullwhip.Items {
 			bool isActive = tile.active() && !tile.inActive();
 
 			if( isActive ) {
-				isPlatform = Main.tileSolidTop[tile.type] && !Main.tileSolid[tile.type];
+				isPlatform = Main.tileSolidTop[tile.type] && Main.tileSolid[tile.type];
 				isBreakable = TileAttributeHelpers.IsBreakable( tileX, tileY );
 			} else {
 				isPlatform = false;

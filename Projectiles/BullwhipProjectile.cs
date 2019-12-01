@@ -49,16 +49,15 @@ namespace Bullwhip.Projectiles {
 		////////////////
 
 		private Vector2 GetAimDirection( Player player ) {
-			if( this.projectile.frame > 4 ) {
+			/*if( this.projectile.frame > 4 ) {
 				return this.projectile.velocity;
-			}
+			}*/
 
-			//return this.projectile.velocity;
-			Vector2 scrPos = Main.screenPosition;
-			scrPos.X += Main.screenWidth / 2;
-			scrPos.Y += Main.screenHeight / 2;
+			Vector2 mousePos = Main.screenPosition + new Vector2(Main.mouseX, Main.mouseY);
 
-			Vector2 aim = scrPos - player.Center;
+			Vector2 aim = mousePos - player.Center;
+			aim.Normalize();
+
 			this.projectile.velocity = aim;
 
 			return aim;
