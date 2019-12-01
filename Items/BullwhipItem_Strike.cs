@@ -1,5 +1,6 @@
 using HamstarHelpers.Helpers.Debug;
 using HamstarHelpers.Helpers.DotNET.Extensions;
+using HamstarHelpers.Helpers.NPCs;
 using HamstarHelpers.Helpers.TModLoader;
 using Microsoft.Xna.Framework;
 using System;
@@ -99,6 +100,16 @@ namespace Bullwhip.Items {
 			npc.velocity += direction * kb;
 			npc.StrikeNPC( dmg, kb, player.direction );
 
+			Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
+			if( tricksterMod != null ) {
+				if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
+					var rand = TmlHelpers.SafelyGetRand();
+					if( rand.NextBool() ) {
+						NPCHelpers.Remove( npc );
+					}
+				}
+			}
+
 			BullwhipItem.CreateHitFx( npc.Center, true );
 		}
 
@@ -134,11 +145,16 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public static bool IsHeadshot( NPC npc, Vector2 targetPoint ) {
+			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
+			if( mynpc.IsHeadWhipped ) {
+				return false;
+			}
+
 			Rectangle rect = npc.getRect();
-			rect.X -= rect.Width;
+			rect.X -= (2 * rect.Width) / 3;
 			rect.Y -= rect.Height / 3;
-			rect.Width += 2 * rect.Width;
-			rect.Height /= 2;
+			rect.Width = (2 * rect.Width) + (rect.Width / 3);
+			rect.Height = rect.Height / 2;
 
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 				Dust.QuickBox(
@@ -163,8 +179,10 @@ namespace Bullwhip.Items {
 		public static void ApplyHeadshot( NPC npc ) {
 			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
 			int tickDuration = 60 * rand.Next(4, 9);
+			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 
 			npc.AddBuff( BuffID.Confused, tickDuration );
+			mynpc.IsHeadWhipped = true;
 		}
 
 

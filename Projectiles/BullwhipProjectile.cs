@@ -48,6 +48,25 @@ namespace Bullwhip.Projectiles {
 
 		////////////////
 
+		private Vector2 GetAimDirection( Player player ) {
+			if( this.projectile.frame > 4 ) {
+				return this.projectile.velocity;
+			}
+
+			//return this.projectile.velocity;
+			Vector2 scrPos = Main.screenPosition;
+			scrPos.X += Main.screenWidth / 2;
+			scrPos.Y += Main.screenHeight / 2;
+
+			Vector2 aim = scrPos - player.Center;
+			this.projectile.velocity = aim;
+
+			return aim;
+		}
+
+
+		////////////////
+
 		public override void AI() {
 			Player ownerPlr = Main.player[ this.projectile.owner ];
 			ownerPlr.heldProj = this.projectile.whoAmI;
@@ -83,7 +102,8 @@ namespace Bullwhip.Projectiles {
 			//this.projectile.position.X = ownerMountedCenter.X - (float)( this.projectile.width / 2 );
 			//this.projectile.position.Y = ownerMountedCenter.Y - (float)( this.projectile.height / 2 );
 
-			this.projectile.rotation = this.projectile.velocity.ToRotation();// + MathHelper.ToRadians( 135f );
+			//this.projectile.rotation = this.projectile.velocity.ToRotation();
+			this.projectile.rotation = this.GetAimDirection( ownerPlr ).ToRotation();
 
 			// Offset by 90 degrees here
 			if( this.projectile.spriteDirection == -1 ) {

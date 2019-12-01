@@ -24,12 +24,16 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public override void SetStaticDefaults() {
+			string tooltips = "Long reach, low damage melee weapon"
+				+ "\nIncapacitates bats, enrages slimes"
+				+ "\nAim for the head to disorient fighters or the undead"
+				+ "\nMay attach to platforms or vines";
+			if( ModLoader.GetMod("TheTrickster") != null ) {
+				tooltips += "\nUse to drive of the Trickster";
+			}
+
 			this.DisplayName.SetDefault( "Bullwhip" );
-			this.Tooltip.SetDefault( "Long reach, low damage melee weapon."
-				+"\nIncapacitates bats."
-				+"\nAim for the head to disorient."
-				+"\nMay attach to platforms or vines."
-			);
+			this.Tooltip.SetDefault( tooltips );
 		}
 
 		public override void SetDefaults() {

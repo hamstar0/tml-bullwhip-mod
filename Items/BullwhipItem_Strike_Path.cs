@@ -128,18 +128,18 @@ namespace Bullwhip.Items {
 					IDictionary<Vector2, IEnumerable<Projectile>> hitProjAt ) {
 			int minDistSqr = minDist * minDist;
 			float distSqr = Vector2.DistanceSquared( start, wldPos );
-			if( distSqr < minDistSqr ) {
-				return false;
-			}
+			bool canHitNpc = distSqr >= minDistSqr;
 
-			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
+			if( canHitNpc && BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 				Dust.QuickDust( wldPos, Color.Yellow );
 			}
 
-			hitNpcAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
+			if( canHitNpc ) {
+				hitNpcAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
+			}
 			hitProjAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
 
-			return hitNpcAt[ wldPos ].ToArray().Count() > 0
+			return (canHitNpc && hitNpcAt[ wldPos ].ToArray().Count() > 0)
 				|| hitProjAt[ wldPos ].ToArray().Count() > 0;
 		}
 	}
