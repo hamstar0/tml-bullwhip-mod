@@ -12,8 +12,8 @@ using Terraria.ModLoader;
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		public static void CastWhipStrike( Player player, Vector2 direction ) {
-			int minWhipDist = BullwhipConfig.Instance.MinimumWhipDist;
-			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
+			int minWhipDist = BullwhipConfig.Instance.MinimumWhipHitDist;
+			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipHitDist;
 			direction.Normalize();
 
 			Vector2 start = player.RotatedRelativePoint( player.MountedCenter, true );
@@ -67,6 +67,7 @@ namespace Bullwhip.Items {
 					IDictionary<int, ISet<int>> breakables,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
 					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
+			var hitTiles = new HashSet<(int, int)>();
 			(int TileX, int TileY)? myHitTileAt = null;
 			(int TileX, int TileY)? myHitPlatformAt = null;
 
@@ -89,7 +90,11 @@ namespace Bullwhip.Items {
 				}
 
 				if( isTile ) {
-					myHitTileAt = (tileX, tileY);
+					isTile = hitTiles.Contains( (tileX, tileY) );
+					if( isTile ) {
+						myHitTileAt = (tileX, tileY);
+					}
+					hitTiles.Add( (tileX, tileY) );
 				}
 				if( isPlatform && !myHitPlatformAt.HasValue ) {
 					myHitPlatformAt = (tileX, tileY);

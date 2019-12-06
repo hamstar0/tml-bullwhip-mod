@@ -37,7 +37,7 @@ namespace Bullwhip.Items {
 				color: Color.White,
 				alpha: 0,
 				scale: 1.25f,
-				fadeIn: 1f
+				fadeIn: 1.25f
 			);
 		}
 

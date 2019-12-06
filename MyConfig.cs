@@ -34,11 +34,11 @@ namespace Bullwhip {
 		public bool PlayerSpawnsWithWhip { get; set; } = true;
 
 
-		[DefaultValue( 128 )]
-		public int MinimumWhipDist { get; set; } = 144;
+		[DefaultValue( 32 )]
+		public int MinimumWhipHitDist { get; set; } = 32;//128;
 
 		[DefaultValue( 192 )]
-		public int MaximumWhipDist { get; set; } = 192;
+		public int MaximumWhipHitDist { get; set; } = 192;
 
 		[DefaultValue( 1 )]
 		public int WhipDamage { get; set; } = 1;

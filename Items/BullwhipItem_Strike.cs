@@ -22,7 +22,7 @@ namespace Bullwhip.Items {
 					IDictionary<int, ISet<int>> breakables,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
 					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
-			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipDist;
+			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipHitDist;
 			Vector2 maxPos = start + (direction * maxWhipDist);
 
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
@@ -31,7 +31,14 @@ namespace Bullwhip.Items {
 
 			foreach( (int tileX, ISet<int> tileYs) in breakables ) {
 				foreach( int tileY in tileYs ) {
+/*Timers.SetTimer("break_"+tileX+"_"+tileY, 50, false, () => {
+	Dust.QuickDust( new Point(tileX, tileY), Color.Red );
+	return true;
+} );*/
 					WorldGen.KillTile( tileX, tileY );
+					if( Main.netMode != 0 ) {
+						NetMessage.SendData( MessageID.TileChange, -1, -1, null, 0, (float)tileX, (float)tileY, 0f, 0, 0, 0 );
+					}
 				}
 			}
 			
@@ -134,6 +141,10 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public static void ApplySlimeshot( NPC npc ) {
+			if( Main.netMode == 1 ) {
+				return;
+			}
+
 			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 

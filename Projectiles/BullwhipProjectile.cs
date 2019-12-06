@@ -78,7 +78,7 @@ namespace Bullwhip.Projectiles {
 					this.IsBegun = true;
 					this.projectile.netUpdate = true;
 				}
-				this.WalkFrames();
+				this.StepThroughFrames();
 			}
 
 			if( !this.IsLastFrame ) {
@@ -113,7 +113,7 @@ namespace Bullwhip.Projectiles {
 
 		////////////////
 
-		private void WalkFrames() {
+		private void StepThroughFrames() {
 			Projectile proj = this.projectile;
 			bool anim = false;
 
@@ -148,7 +148,7 @@ namespace Bullwhip.Projectiles {
 
 				if( proj.frame == 4 ) {
 					var sndPos = proj.Center;
-					sndPos += Vector2.Normalize(proj.velocity) * BullwhipConfig.Instance.MaximumWhipDist;
+					sndPos += Vector2.Normalize(proj.velocity) * BullwhipConfig.Instance.MaximumWhipHitDist;
 
 					BullwhipItem.PlaySound( sndPos );
 				}

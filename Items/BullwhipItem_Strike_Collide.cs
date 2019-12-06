@@ -1,5 +1,5 @@
 using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.Tiles;
+using HamstarHelpers.Helpers.Tiles.Attributes;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -54,31 +54,35 @@ namespace Bullwhip.Items {
 		}
 
 		private static IEnumerable<(int TileX, int TileY)> FindNearbyBreakableTiles( int tileX, int tileY ) {
+			if( TileAttributeHelpers.IsBreakable(tileX, tileY) ) {
+				yield return (tileX, tileY);
+			}
+
 			if( TileAttributeHelpers.IsBreakable(tileX - 1, tileY - 1) ) {
-				yield return (tileX - 1, tileY);
+				yield return (tileX - 1, tileY - 1);
 			}
 			if( TileAttributeHelpers.IsBreakable(tileX, tileY - 1) ) {
-				yield return (tileX - 1, tileY);
+				yield return (tileX, tileY - 1);
 			}
 			if( TileAttributeHelpers.IsBreakable(tileX + 1, tileY - 1) ) {
-				yield return (tileX - 1, tileY);
+				yield return (tileX + 1, tileY - 1);
 			}
 
 			if( TileAttributeHelpers.IsBreakable(tileX - 1, tileY) ) {
-				yield return (tileX + 1, tileY);
+				yield return (tileX - 1, tileY);
 			}
 			if( TileAttributeHelpers.IsBreakable(tileX + 1, tileY) ) {
 				yield return (tileX + 1, tileY);
 			}
 
 			if( TileAttributeHelpers.IsBreakable(tileX - 1, tileY + 1) ) {
-				yield return (tileX, tileY - 1);
+				yield return (tileX - 1, tileY + 1);
 			}
 			if( TileAttributeHelpers.IsBreakable(tileX, tileY + 1) ) {
 				yield return (tileX, tileY + 1);
 			}
 			if( TileAttributeHelpers.IsBreakable(tileX + 1, tileY + 1) ) {
-				yield return (tileX, tileY + 1);
+				yield return (tileX + 1, tileY + 1);
 			}
 		}
 	}
