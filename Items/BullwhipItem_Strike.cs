@@ -41,19 +41,27 @@ namespace Bullwhip.Items {
 					}
 				}
 			}
-			
+
+			var checkedNpcs = new HashSet<NPC>();
 			bool isNpcHit = false;
 			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
 				foreach( NPC npc in npcs ) {
 					isNpcHit = true;
+					if( checkedNpcs.Contains(npc) ) { continue; }
+					checkedNpcs.Add( npc );
+
 					BullwhipItem.Strike( player, direction, target, npc );
 				}
 			}
 
+			var checkedProjs = new HashSet<Projectile>();
 			bool isProjHit = false;
 			foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
 				foreach( Projectile proj in projs ) {
 					isProjHit = true;
+					if( checkedProjs.Contains(proj) ) { continue; }
+					checkedProjs.Add( proj );
+
 					BullwhipItem.Strike( player, direction, target, proj );
 					proj.friendly = true;
 					proj.hostile = false;
