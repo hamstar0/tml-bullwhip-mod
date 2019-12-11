@@ -172,9 +172,9 @@ namespace Bullwhip.Items {
 			}
 
 			Rectangle rect = npc.getRect();
-			rect.X -= (2 * rect.Width) / 3;
+			rect.X -= rect.Width;
 			rect.Y -= rect.Height / 3;
-			rect.Width = (2 * rect.Width) + (rect.Width / 3);
+			rect.Width = 3 * rect.Width;
 			rect.Height = rect.Height / 2;
 
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
