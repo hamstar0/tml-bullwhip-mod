@@ -134,6 +134,8 @@ namespace Bullwhip.Items {
 			int minDistSqr = minDist * minDist;
 			float distSqr = Vector2.DistanceSquared( start, wldPos );
 			bool canHitNpc = distSqr >= minDistSqr;
+			int maxHits = BullwhipConfig.Instance.MaxWhipEntityHits;
+			maxHits = maxHits == 0 ? Int32.MaxValue - 1 : maxHits;
 
 			if( canHitNpc && BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 				Dust.QuickDust( wldPos, Color.Yellow );
@@ -144,8 +146,8 @@ namespace Bullwhip.Items {
 			}
 			hitProjAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
 
-			return (canHitNpc && hitNpcAt[ wldPos ].ToArray().Count() > 0)
-				|| hitProjAt[ wldPos ].ToArray().Count() > 0;
+			return (canHitNpc && hitNpcAt[ wldPos ].ToArray().Length >= maxHits)
+							  || hitProjAt[ wldPos ].ToArray().Length >= maxHits;
 		}
 	}
 }

@@ -55,6 +55,8 @@ namespace Bullwhip.Items {
 				foreach( Projectile proj in projs ) {
 					isProjHit = true;
 					BullwhipItem.Strike( player, direction, target, proj );
+					proj.friendly = true;
+					proj.hostile = false;
 				}
 			}
 

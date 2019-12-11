@@ -48,8 +48,8 @@ namespace Bullwhip {
 		public float WhipKnockback { get; set; } = 20f;
 
 		[Range( 1, 128 )]
-		[DefaultValue( 32 )]
-		public int WhipNPCHitRadius { get; set; } = 32;
+		[DefaultValue( 36 )]
+		public int WhipNPCHitRadius { get; set; } = 36;
 		[Range( 1, 128 )]
 		[DefaultValue( 36 )]
 		public int WhipProjectileHitRadius { get; set; } = 36;
@@ -63,7 +63,12 @@ namespace Bullwhip {
 		[Range( 0f, 0.5f )]
 		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
 		public float WhipLedgePullStrength { get; set; } = 0.1f;
-		
+
+
+		[Range( 0, 16 )]
+		[DefaultValue( 3 )]
+		public int MaxWhipEntityHits { get; set; } = 3;
+
 
 
 		////////////////
