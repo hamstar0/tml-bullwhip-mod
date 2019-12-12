@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 namespace Bullwhip {
 	class BullwhipNPC : GlobalNPC {
 		public bool IsEnraged { get; private set; } = false;
-		public bool IsHeadWhipped { get; internal set; } = false;
+		public bool IsConfuseWhipped { get; internal set; } = false;
 
 		////
 

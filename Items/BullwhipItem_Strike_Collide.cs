@@ -34,6 +34,19 @@ namespace Bullwhip.Items {
 				return Vector2.DistanceSquared(anyProj.Center, wldPos) < projRadiusSqr;
 			} );
 		}
+		
+
+		private static IEnumerable<Item> FindWhipItemCollisionAt( Vector2 wldPos ) {
+			int itemRadiusSqr = BullwhipConfig.Instance.WhipItemHitRadius;
+			itemRadiusSqr *= itemRadiusSqr;
+
+			return Main.item.Where( anyItem => {
+				if( anyItem == null || !anyItem.active ) {
+					return false;
+				}
+				return Vector2.DistanceSquared(anyItem.Center, wldPos) < itemRadiusSqr;
+			} );
+		}
 
 
 		////

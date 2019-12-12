@@ -26,6 +26,7 @@ namespace Bullwhip.Items {
 			IDictionary<int, ISet<int>> breakables = new Dictionary<int, ISet<int>>();
 			IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt = new Dictionary<Vector2, IEnumerable<NPC>>();
 			IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt = new Dictionary<Vector2, IEnumerable<Projectile>>();
+			IDictionary<Vector2, IEnumerable<Item>> hitItemsAt = new Dictionary<Vector2, IEnumerable<Item>>();
 
 			///
 
@@ -38,7 +39,8 @@ namespace Bullwhip.Items {
 				hitPlatformAt: out hitPlatformAt,
 				breakables: breakables,
 				hitNpcsAt: hitNpcsAt,
-				hitProjsAt: hitProjsAt
+				hitProjsAt: hitProjsAt,
+				hitItemsAt: hitItemsAt
 			);
 
 			///
@@ -51,7 +53,8 @@ namespace Bullwhip.Items {
 				hitTileAt: hitTileAt,
 				hitPlatformAt: hitPlatformAt,
 				hitNpcsAt: hitNpcsAt,
-				hitProjsAt: hitProjsAt
+				hitProjsAt: hitProjsAt,
+				hitItemsAt: hitItemsAt
 			);
 		}
 
@@ -66,13 +69,14 @@ namespace Bullwhip.Items {
 					out (int TileX, int TileY)? hitPlatformAt,
 					IDictionary<int, ISet<int>> breakables,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
-					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
+					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
 			var hitTiles = new HashSet<(int, int)>();
 			(int TileX, int TileY)? myHitTileAt = null;
 			(int TileX, int TileY)? myHitPlatformAt = null;
 
 			bool checkPerUnit( Vector2 wldPos ) {
-				return BullwhipItem.CheckCollisionPerUnit( start, wldPos, minDist, hitNpcsAt, hitProjsAt );
+				return BullwhipItem.CheckCollisionPerUnit( start, wldPos, minDist, hitNpcsAt, hitProjsAt, hitItemsAt );
 			};
 
 			bool checkPerTile( int tileX, int tileY ) {
@@ -129,8 +133,9 @@ namespace Bullwhip.Items {
 					Vector2 start,
 					Vector2 wldPos,
 					int minDist,
-					IDictionary<Vector2, IEnumerable<NPC>> hitNpcAt,
-					IDictionary<Vector2, IEnumerable<Projectile>> hitProjAt ) {
+					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
+					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
 			int minDistSqr = minDist * minDist;
 			float distSqr = Vector2.DistanceSquared( start, wldPos );
 			bool canHitNpc = distSqr >= minDistSqr;
@@ -142,12 +147,13 @@ namespace Bullwhip.Items {
 			}
 
 			if( canHitNpc ) {
-				hitNpcAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
+				hitNpcsAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
 			}
-			hitProjAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
+			hitProjsAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
+			hitItemsAt[wldPos] = BullwhipItem.FindWhipItemCollisionAt( wldPos );
 
-			return (canHitNpc && hitNpcAt[ wldPos ].ToArray().Length >= maxHits)
-							  || hitProjAt[ wldPos ].ToArray().Length >= maxHits;
+			return (canHitNpc && hitNpcsAt[ wldPos ].ToArray().Length >= maxHits)
+							  || hitProjsAt[ wldPos ].ToArray().Length >= maxHits;
 		}
 	}
 }

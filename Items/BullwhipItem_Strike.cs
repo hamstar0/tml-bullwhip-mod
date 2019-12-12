@@ -21,7 +21,8 @@ namespace Bullwhip.Items {
 					(int TileX, int TileY)? hitPlatformAt,
 					IDictionary<int, ISet<int>> breakables,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
-					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
+					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
 			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipHitDist;
 			Vector2 maxPos = start + (direction * maxWhipDist);
 
@@ -68,6 +69,18 @@ namespace Bullwhip.Items {
 				}
 			}
 
+			var checkedItems = new HashSet<Item>();
+			bool isItemHit = false;
+			foreach( (Vector2 target, IEnumerable<Item> items) in hitItemsAt ) {
+				foreach( Item item in items ) {
+					isItemHit = true;
+					if( checkedItems.Contains(item) ) { continue; }
+					checkedItems.Add( item );
+
+					BullwhipItem.Strike( player, direction, target, item );
+				}
+			}
+
 			if( !isNpcHit ) {
 				if( hitPlatformAt.HasValue ) {
 					BullwhipItem.GrabPlatform( player, hitPlatformAt.Value.TileX, hitPlatformAt.Value.TileY );
@@ -94,6 +107,7 @@ namespace Bullwhip.Items {
 			}
 
 			BullwhipConfig config = BullwhipConfig.Instance;
+			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 			int dmg = config.WhipDamage;
 			float kb = config.WhipKnockback;
 
@@ -102,8 +116,8 @@ namespace Bullwhip.Items {
 				BullwhipItem.ApplySlimeshot( npc );
 				break;
 			case 3:     // fighters
-				if( BullwhipItem.IsHeadshot( npc, hitWorldPosition ) ) {
-					BullwhipItem.ApplyHeadshot( npc );
+				if( !mynpc.IsConfuseWhipped && BullwhipItem.IsHeadshot(npc, hitWorldPosition) ) {
+					BullwhipItem.ApplyConfuse( npc );
 				}
 				break;
 			case 14:    // bats
@@ -112,6 +126,13 @@ namespace Bullwhip.Items {
 					kb = 1f;
 				}
 				break;
+			}
+
+			if( !mynpc.IsConfuseWhipped ) {
+				UnifiedRandom rand = TmlHelpers.SafelyGetRand();
+				if( rand.NextFloat() <= config.WhipConfuseChance ) {
+					BullwhipItem.ApplyConfuse( npc );
+				}
 			}
 
 			npc.velocity += direction * kb;
@@ -148,6 +169,11 @@ namespace Bullwhip.Items {
 		}
 
 
+		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, Item item ) {
+			item.position = player.position;
+		}
+
+
 		////////////////
 
 		public static void ApplySlimeshot( NPC npc ) {
@@ -166,11 +192,6 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public static bool IsHeadshot( NPC npc, Vector2 targetPoint ) {
-			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
-			if( mynpc.IsHeadWhipped ) {
-				return false;
-			}
-
 			Rectangle rect = npc.getRect();
 			rect.X -= rect.Width;
 			rect.Y -= rect.Height / 3;
@@ -197,13 +218,15 @@ namespace Bullwhip.Items {
 			return rect.Contains( (int)targetPoint.X, (int)targetPoint.Y );
 		}
 
-		public static void ApplyHeadshot( NPC npc ) {
+		////
+
+		public static void ApplyConfuse( NPC npc ) {
 			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
 			int tickDuration = 60 * rand.Next(4, 9);
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 
 			npc.AddBuff( BuffID.Confused, tickDuration );
-			mynpc.IsHeadWhipped = true;
+			mynpc.IsConfuseWhipped = true;
 		}
 
 
