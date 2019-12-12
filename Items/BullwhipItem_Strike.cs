@@ -129,9 +129,11 @@ namespace Bullwhip.Items {
 			}
 
 			if( !mynpc.IsConfuseWhipped ) {
-				UnifiedRandom rand = TmlHelpers.SafelyGetRand();
-				if( rand.NextFloat() <= config.WhipConfuseChance ) {
-					BullwhipItem.ApplyConfuse( npc );
+				// Doesn't work on slimes
+				if( npc.aiStyle != 1 ) {
+					if( TmlHelpers.SafelyGetRand().NextFloat() <= config.WhipConfuseChance ) {
+						BullwhipItem.ApplyConfuse( npc );
+					}
 				}
 			}
 
