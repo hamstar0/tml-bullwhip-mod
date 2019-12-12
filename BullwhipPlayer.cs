@@ -57,10 +57,10 @@ namespace Bullwhip {
 		////////////////
 
 		public void SetPullHeading( Vector2 pullHeading ) {
-			if( pullHeading.LengthSquared() > 9216 ) {  //96^2
-				pullHeading.Normalize();
-				pullHeading *= 96;
-			}
+			//if( pullHeading.LengthSquared() > 9216 ) {  //96^2
+			pullHeading.Normalize();
+			//pullHeading *= 96;
+			//}
 
 			this.PullHeading = pullHeading;
 		}
