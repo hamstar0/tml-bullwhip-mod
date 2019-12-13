@@ -65,10 +65,10 @@ namespace Bullwhip {
 		public bool IncapacitatesBats { get; set; } = true;
 
 
-		[DefaultValue( 10.6f )]
+		[DefaultValue( 11.4f )]
 		[Range( 0f, 100f )]
 		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
-		public float WhipLedgePullStrength { get; set; } = 10.6f;
+		public float WhipLedgePullStrength { get; set; } = 11.4f;
 
 
 		[Range( 0, 16 )]
@@ -76,10 +76,10 @@ namespace Bullwhip {
 		public int MaxWhipEntityHits { get; set; } = 3;
 
 
-		[DefaultValue( 1f / 3f )]
+		[DefaultValue( 1f / 2.5f )]
 		[Range( 0f, 1f )]
 		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
-		public float WhipConfuseChance { get; set; } = 1f / 3f;
+		public float WhipConfuseChance { get; set; } = 1f / 2.5f;
 
 
 
