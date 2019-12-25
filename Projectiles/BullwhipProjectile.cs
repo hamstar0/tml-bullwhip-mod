@@ -1,8 +1,10 @@
-﻿using Bullwhip.Items;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
+using HamstarHelpers.Helpers.Debug;
+using Bullwhip.Items;
 
 
 namespace Bullwhip.Projectiles {
@@ -71,7 +73,14 @@ namespace Bullwhip.Projectiles {
 			ownerPlr.heldProj = this.projectile.whoAmI;
 			//ownerPlr.itemTime = ownerPlr.itemAnimation;
 
-			this.UpdatePosition();
+			if( Main.netMode != 2 ) {
+				if( Main.myPlayer == ownerPlr.whoAmI ) {
+					this.UpdatePosition();
+					NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, this.projectile.whoAmI );
+				}
+			} else {
+				NetMessage.SendData( MessageID.SyncProjectile, -1, this.projectile.owner, null, this.projectile.whoAmI );
+			}
 
 			if( !ownerPlr.frozen ) {
 				if( !this.IsBegun ) {
@@ -85,12 +94,17 @@ namespace Bullwhip.Projectiles {
 				if( this.projectile.timeLeft < 3 ) {
 					this.projectile.timeLeft = 3;
 				}
-			} else {
-				if( this.projectile.timeLeft == 1 ) {
-					BullwhipItem.CastWhipStrike( ownerPlr, this.projectile.velocity );
-				}
 			}
 		}
+
+		public override void Kill( int timeLeft ) {
+			Player ownerPlr = Main.player[this.projectile.owner];
+//LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
+			BullwhipItem.CastWhipStrike( ownerPlr, this.projectile.velocity );
+		}
+
+
+		////////////////
 
 		private void UpdatePosition() {
 			Player ownerPlr = Main.player[this.projectile.owner];

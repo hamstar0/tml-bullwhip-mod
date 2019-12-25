@@ -1,6 +1,5 @@
 using HamstarHelpers.Helpers.Debug;
 using HamstarHelpers.Helpers.DotNET.Extensions;
-using HamstarHelpers.Helpers.NPCs;
 using HamstarHelpers.Helpers.TModLoader;
 using Microsoft.Xna.Framework;
 using System;
@@ -22,6 +21,7 @@ namespace Bullwhip.Items {
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
 					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
 					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
+//LogHelpers.Log("WHIP 2 - start:"+start.ToShortString()+", hitNpcsAt:"+hitNpcsAt.Count2D()+", hitProjsAt:"+hitProjsAt.Count2D()+", hitItemsAt:"+hitItemsAt.Count2D());
 			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipHitDist;
 			Vector2 maxPos = start + (direction * maxWhipDist);
 
@@ -50,7 +50,7 @@ namespace Bullwhip.Items {
 					if( checkedNpcs.Contains(npc) ) { continue; }
 					checkedNpcs.Add( npc );
 
-					BullwhipItem.Strike( player, direction, target, npc );
+					BullwhipItem.StrikeNPC( player, direction, target, npc );
 				}
 			}
 
@@ -62,7 +62,7 @@ namespace Bullwhip.Items {
 					if( checkedProjs.Contains(proj) ) { continue; }
 					checkedProjs.Add( proj );
 
-					BullwhipItem.Strike( player, direction, target, proj );
+					BullwhipItem.StrikeProjectile( player, direction, target, proj );
 					proj.friendly = true;
 					proj.hostile = false;
 				}
@@ -76,7 +76,7 @@ namespace Bullwhip.Items {
 					if( checkedItems.Contains(item) ) { continue; }
 					checkedItems.Add( item );
 
-					BullwhipItem.Strike( player, direction, target, item );
+					BullwhipItem.StrikeItem( player, direction, target, item );
 				}
 			}
 
@@ -100,7 +100,7 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, NPC npc ) {
+		public static void StrikeNPC( Player player, Vector2 direction, Vector2 hitWorldPosition, NPC npc ) {
 			if( npc.immortal ) {
 				return;
 			}
@@ -141,19 +141,37 @@ namespace Bullwhip.Items {
 
 			Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
 			if( tricksterMod != null ) {
-				if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
-					var rand = TmlHelpers.SafelyGetRand();
-					if( rand.NextBool() ) {
-						NPCHelpers.Remove( npc );
-					}
+				if( npc.type == tricksterMod.NPCType( "TricksterNPC" ) ) {
+					BullwhipItem.StrikeTrickster( npc );
 				}
 			}
 
 			BullwhipItem.CreateHitEntityFx( npc.Center );
+//LogHelpers.Log("WHIP 3 "+npc.TypeName+" ("+npc.whoAmI+"), direction:"+direction.ToShortString()+", hitWorldPosition:"+hitWorldPosition.ToShortString());
 		}
 
 
-		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, Projectile proj ) {
+		private static void StrikeTrickster( NPC npc ) {
+			if( Main.netMode != 1 ) {
+				return;
+			}
+
+			var rand = TmlHelpers.SafelyGetRand();
+			if( !rand.NextBool() ) {
+				return;
+			}
+
+			//NPCHelpers.Remove( npc );
+			var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
+			mynpc.Flee();
+
+			if( Main.netMode == 2 ) {
+				NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI );
+			}
+		}
+
+
+		public static void StrikeProjectile( Player player, Vector2 direction, Vector2 hitWorldPosition, Projectile proj ) {
 			BullwhipConfig config = BullwhipConfig.Instance;
 			//int dmg = config.WhipDamage;
 			//float kb = config.WhipKnockback;
@@ -170,7 +188,7 @@ namespace Bullwhip.Items {
 		}
 
 
-		public static void Strike( Player player, Vector2 direction, Vector2 hitWorldPosition, Item item ) {
+		public static void StrikeItem( Player player, Vector2 direction, Vector2 hitWorldPosition, Item item ) {
 			item.position = player.position;
 		}
 	}

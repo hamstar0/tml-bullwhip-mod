@@ -18,7 +18,8 @@ namespace Bullwhip.Items {
 				if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
 					return false;
 				}
-				return Vector2.DistanceSquared(anyNpc.Center, wldPos) < npcRadiusSqr;
+				float distSqr = Vector2.DistanceSquared( anyNpc.Center, wldPos );
+				return distSqr < npcRadiusSqr;
 			} );
 		}
 		
