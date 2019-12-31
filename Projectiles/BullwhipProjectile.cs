@@ -5,6 +5,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using HamstarHelpers.Helpers.Debug;
 using Bullwhip.Items;
+using System;
 
 
 namespace Bullwhip.Projectiles {
@@ -111,12 +112,19 @@ namespace Bullwhip.Projectiles {
 			Vector2 ownerMountedCenter = ownerPlr.RotatedRelativePoint( ownerPlr.MountedCenter, true );
 
 			this.projectile.direction = ownerPlr.direction;
-			this.projectile.Center = ownerMountedCenter - (Vector2.Normalize(this.projectile.velocity) * 12f);
-			//this.projectile.position.X = ownerMountedCenter.X - (float)( this.projectile.width / 2 );
-			//this.projectile.position.Y = ownerMountedCenter.Y - (float)( this.projectile.height / 2 );
+			//this.projectile.Center = ownerMountedCenter - (Vector2.Normalize(this.projectile.velocity) * 12f);
 
 			//this.projectile.rotation = this.projectile.velocity.ToRotation();
 			this.projectile.rotation = this.GetAimDirection( ownerPlr ).ToRotation();
+
+			float swingPercent = (float)this.projectile.frame / (float)Main.projFrames[ this.projectile.type ];
+			float swingDegreesArc = 180f * (ownerPlr.direction > 0 ? swingPercent : (1f - swingPercent));
+			float swingDegrees = 180 + swingDegreesArc;
+			float swingRadians = MathHelper.ToRadians( swingDegrees );
+			var swingDir = new Vector2( (float)Math.Cos(swingRadians), (float)Math.Sin(swingRadians) );
+			var swingPos = ownerMountedCenter + ( swingDir * 10 );
+
+			this.projectile.Center = swingPos;
 
 			// Offset by 90 degrees here
 			if( this.projectile.spriteDirection == -1 ) {
