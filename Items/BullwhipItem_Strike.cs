@@ -1,5 +1,6 @@
 using HamstarHelpers.Helpers.Debug;
 using HamstarHelpers.Helpers.DotNET.Extensions;
+using HamstarHelpers.Helpers.NPCs;
 using HamstarHelpers.Helpers.TModLoader;
 using Microsoft.Xna.Framework;
 using System;
@@ -110,46 +111,49 @@ namespace Bullwhip.Items {
 			int dmg = config.WhipDamage;
 			float kb = config.WhipKnockback;
 
-			switch( npc.aiStyle ) {
-			case 1:     // slimes
-				BullwhipItem.ApplySlimeshot( npc );
-				break;
-			case 3:     // fighters
-				if( !mynpc.IsConfuseWhipped && BullwhipItem.IsHeadshot(npc, hitWorldPosition) ) {
-					BullwhipItem.ApplyConfuse( npc );
-				}
-				break;
-			case 14:    // bats
-				if( BullwhipConfig.Instance.IncapacitatesBats && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
-					npc.aiStyle = 16;
-					kb = 1f;
-				}
-				break;
-			}
-
-			if( !mynpc.IsConfuseWhipped ) {
-				// Doesn't work on slimes
-				if( npc.aiStyle != 1 ) {
-					if( TmlHelpers.SafelyGetRand().NextFloat() <= config.WhipConfuseChance ) {
+			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
+				NPCHelpers.Kill( npc );
+			} else {
+				switch( npc.aiStyle ) {
+				case 1:     // slimes
+					BullwhipItem.ApplySlimeshot( npc );
+					break;
+				case 3:     // fighters
+					if( !mynpc.IsConfuseWhipped && BullwhipItem.IsHeadshot( npc, hitWorldPosition ) ) {
 						BullwhipItem.ApplyConfuse( npc );
 					}
+					break;
+				case 14:    // bats
+					if( BullwhipConfig.Instance.IncapacitatesBats && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
+						npc.aiStyle = 16;
+						kb = 1f;
+					}
+					break;
 				}
-			}
 
-			npc.velocity += direction * kb;
-			npc.StrikeNPC( dmg, kb, player.direction );
+				if( !mynpc.IsConfuseWhipped ) {
+					// Doesn't work on slimes
+					if( npc.aiStyle != 1 ) {
+						if( TmlHelpers.SafelyGetRand().NextFloat() <= config.WhipConfuseChance ) {
+							BullwhipItem.ApplyConfuse( npc );
+						}
+					}
+				}
 
-			Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
-			if( tricksterMod != null ) {
-				if( npc.type == tricksterMod.NPCType( "TricksterNPC" ) ) {
-					BullwhipItem.StrikeTrickster( npc );
+				npc.velocity += direction * kb;
+				npc.StrikeNPC( dmg, kb, player.direction );
+
+				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
+				if( tricksterMod != null ) {
+					if( npc.type == tricksterMod.NPCType( "TricksterNPC" ) ) {
+						BullwhipItem.StrikeTrickster( npc );
+					}
 				}
 			}
 
 			BullwhipItem.CreateHitEntityFx( npc.Center );
 //LogHelpers.Log("WHIP 3 "+npc.TypeName+" ("+npc.whoAmI+"), direction:"+direction.ToShortString()+", hitWorldPosition:"+hitWorldPosition.ToShortString());
 		}
-
 
 		private static void StrikeTrickster( NPC npc ) {
 			if( Main.netMode != 1 ) {
@@ -160,7 +164,7 @@ namespace Bullwhip.Items {
 			if( !rand.NextBool() ) {
 				return;
 			}
-
+			
 			//NPCHelpers.Remove( npc );
 			var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
 			mynpc.Flee();
@@ -175,6 +179,11 @@ namespace Bullwhip.Items {
 			BullwhipConfig config = BullwhipConfig.Instance;
 			//int dmg = config.WhipDamage;
 			//float kb = config.WhipKnockback;
+
+			// Ignore beehives
+			if( proj.type == ProjectileID.BeeHive ) {
+				return;
+			}
 
 			float speed = proj.velocity.Length();
 			direction.Normalize();
