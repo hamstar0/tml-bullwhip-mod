@@ -27,6 +27,7 @@ namespace Bullwhip.Items {
 			IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt = new Dictionary<Vector2, IEnumerable<NPC>>();
 			IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt = new Dictionary<Vector2, IEnumerable<Projectile>>();
 			IDictionary<Vector2, IEnumerable<Item>> hitItemsAt = new Dictionary<Vector2, IEnumerable<Item>>();
+			IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt = new Dictionary<Vector2, IEnumerable<Player>>();
 
 			///
 
@@ -40,7 +41,8 @@ namespace Bullwhip.Items {
 				breakables: breakables,
 				hitNpcsAt: hitNpcsAt,
 				hitProjsAt: hitProjsAt,
-				hitItemsAt: hitItemsAt
+				hitItemsAt: hitItemsAt,
+				hitPlayersAt: hitPlayersAt
 			);
 
 			///
@@ -54,7 +56,8 @@ namespace Bullwhip.Items {
 				hitPlatformAt: hitPlatformAt,
 				hitNpcsAt: hitNpcsAt,
 				hitProjsAt: hitProjsAt,
-				hitItemsAt: hitItemsAt
+				hitItemsAt: hitItemsAt,
+				hitPlayersAt: hitPlayersAt
 			);
 		}
 
@@ -70,13 +73,27 @@ namespace Bullwhip.Items {
 					IDictionary<int, ISet<int>> breakables,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
 					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
-					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
+					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
+					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
 			var hitTiles = new HashSet<(int, int)>();
 			(int TileX, int TileY)? myHitTileAt = null;
 			(int TileX, int TileY)? myHitPlatformAt = null;
 
+			bool hitNpc = false;
+			bool hitProj = false;
 			bool checkPerUnit( Vector2 wldPos ) {
-				return BullwhipItem.CheckCollisionPerUnit( start, wldPos, minDist, hitNpcsAt, hitProjsAt, hitItemsAt );
+				BullwhipItem.CheckCollisionPerUnit(
+					start,
+					wldPos,
+					minDist,
+					hitNpcsAt,
+					hitProjsAt,
+					hitItemsAt,
+					hitPlayersAt,
+					ref hitNpc,
+					ref hitProj
+				);
+				return false;
 			};
 
 			bool checkPerTile( int tileX, int tileY ) {
@@ -114,11 +131,11 @@ namespace Bullwhip.Items {
 			///
 
 			bool found = CollisionHelpers.CastRay(
-				start,
-				direction,
-				maxDist,
-				checkPerUnit,
-				checkPerTile
+				worldPosition: start,
+				direction: direction,
+				maxWorldDistance: maxDist,
+				checkPerUnit: checkPerUnit,
+				checkPerTile: checkPerTile
 			);
 
 			hitPlatformAt = myHitPlatformAt;
@@ -129,31 +146,40 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		private static bool CheckCollisionPerUnit(
+		private static void CheckCollisionPerUnit(
 					Vector2 start,
 					Vector2 wldPos,
 					int minDist,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
 					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
-					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
+					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
+					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt,
+					ref bool hitNpc,
+					ref bool hitProj ) {
 			int minDistSqr = minDist * minDist;
 			float distSqr = Vector2.DistanceSquared( start, wldPos );
-			bool canHitNpc = distSqr >= minDistSqr;
+			if( distSqr < minDistSqr ) {
+				return;
+			}
+
 			int maxHits = BullwhipConfig.Instance.MaxWhipEntityHits;
 			maxHits = maxHits == 0 ? Int32.MaxValue - 1 : maxHits;
 
-			if( canHitNpc && BullwhipConfig.Instance.DebugModeStrikeInfo ) {
+			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 				Dust.QuickDust( wldPos, Color.Yellow );
 			}
 
-			if( canHitNpc ) {
+			if( !hitNpc ) {
 				hitNpcsAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
 			}
-			hitProjsAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
+			if( !hitProj ) {
+				hitProjsAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
+			}
 			hitItemsAt[wldPos] = BullwhipItem.FindWhipItemCollisionAt( wldPos );
+			hitPlayersAt[wldPos] = BullwhipItem.FindWhipPlayerCollisionAt( wldPos );
 
-			return (canHitNpc && hitNpcsAt[ wldPos ].ToArray().Length >= maxHits)
-							  || hitProjsAt[ wldPos ].ToArray().Length >= maxHits;
+			hitNpc = hitNpc		|| (hitNpcsAt[wldPos].ToArray().Length >= maxHits);
+			hitProj = hitProj	|| (hitProjsAt[wldPos].ToArray().Length >= maxHits);
 		}
 	}
 }

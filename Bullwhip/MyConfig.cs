@@ -43,14 +43,14 @@ namespace Bullwhip {
 		[DefaultValue( 1 )]
 		public int WhipDamage { get; set; } = 1;
 
-		[DefaultValue( 20f )]
+		[DefaultValue( 17f )]//20f
 		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
-		public float WhipKnockback { get; set; } = 20f;
+		public float WhipKnockback { get; set; } = 17f;
 
 
 		[Range( 1, 128 )]
-		[DefaultValue( 36 )]
-		public int WhipNPCHitRadius { get; set; } = 36;
+		[DefaultValue( 28 )]//32
+		public int WhipNPCHitRadius { get; set; } = 28;
 
 		[Range( 1, 128 )]
 		[DefaultValue( 36 )]

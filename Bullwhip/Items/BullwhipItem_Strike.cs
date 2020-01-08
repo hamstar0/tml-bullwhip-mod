@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -21,7 +22,8 @@ namespace Bullwhip.Items {
 					IDictionary<int, ISet<int>> breakables,
 					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
 					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
-					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
+					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
+					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
 //LogHelpers.Log("WHIP 2 - start:"+start.ToShortString()+", hitNpcsAt:"+hitNpcsAt.Count2D()+", hitProjsAt:"+hitProjsAt.Count2D()+", hitItemsAt:"+hitItemsAt.Count2D());
 			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipHitDist;
 			Vector2 maxPos = start + (direction * maxWhipDist);
@@ -43,43 +45,10 @@ namespace Bullwhip.Items {
 				}
 			}
 
-			var checkedNpcs = new HashSet<NPC>();
-			bool isNpcHit = false;
-			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
-				foreach( NPC npc in npcs ) {
-					isNpcHit = true;
-					if( checkedNpcs.Contains(npc) ) { continue; }
-					checkedNpcs.Add( npc );
-
-					BullwhipItem.StrikeNPC( player, direction, target, npc );
-				}
-			}
-
-			var checkedProjs = new HashSet<Projectile>();
-			bool isProjHit = false;
-			foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
-				foreach( Projectile proj in projs ) {
-					isProjHit = true;
-					if( checkedProjs.Contains(proj) ) { continue; }
-					checkedProjs.Add( proj );
-
-					BullwhipItem.StrikeProjectile( player, direction, target, proj );
-					proj.friendly = true;
-					proj.hostile = false;
-				}
-			}
-
-			var checkedItems = new HashSet<Item>();
-			bool isItemHit = false;
-			foreach( (Vector2 target, IEnumerable<Item> items) in hitItemsAt ) {
-				foreach( Item item in items ) {
-					isItemHit = true;
-					if( checkedItems.Contains(item) ) { continue; }
-					checkedItems.Add( item );
-
-					BullwhipItem.StrikeItem( player, direction, target, item );
-				}
-			}
+			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPC( player, direction, hitNpcsAt );
+			BullwhipItem.ApplyWhipStrikeOnProjectile( player, direction, hitProjsAt );
+			BullwhipItem.ApplyWhipStrikeOnItem( player, direction, hitItemsAt );
+			BullwhipItem.ApplyWhipStrikeOnPlayer( player, direction, hitPlayersAt );
 
 			if( !isNpcHit ) {
 				if( hitPlatformAt.HasValue ) {
@@ -98,11 +67,95 @@ namespace Bullwhip.Items {
 			}
 		}
 
+		////
+
+		private static bool ApplyWhipStrikeOnNPC(
+					Player player,
+					Vector2 direction,
+					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt ) {
+			bool isNpcHit = false;
+			var checkedNpcs = new HashSet<NPC>();
+
+			foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
+				foreach( NPC npc in npcs ) {
+					isNpcHit = true;
+					if( checkedNpcs.Contains(npc) ) { continue; }
+					checkedNpcs.Add( npc );
+
+					BullwhipItem.StrikeNPC( player, direction, target, npc );
+				}
+			}
+
+			return isNpcHit;
+		}
+
+		private static bool ApplyWhipStrikeOnProjectile(
+					Player player,
+					Vector2 direction,
+					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
+			var checkedProjs = new HashSet<Projectile>();
+			bool isProjHit = false;
+
+			foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
+				foreach( Projectile proj in projs ) {
+					isProjHit = true;
+					if( checkedProjs.Contains(proj) ) { continue; }
+					checkedProjs.Add( proj );
+
+					BullwhipItem.StrikeProjectile( player, direction, target, proj );
+					proj.friendly = true;
+					proj.hostile = false;
+				}
+			}
+
+			return isProjHit;
+		}
+
+		private static bool ApplyWhipStrikeOnItem(
+					Player player,
+					Vector2 direction,
+					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
+			var checkedItems = new HashSet<Item>();
+			bool isItemHit = false;
+
+			foreach( (Vector2 target, IEnumerable<Item> items) in hitItemsAt ) {
+				foreach( Item item in items ) {
+					isItemHit = true;
+					if( checkedItems.Contains(item) ) { continue; }
+					checkedItems.Add( item );
+
+					BullwhipItem.StrikeItem( player, direction, target, item );
+				}
+			}
+
+			return isItemHit;
+		}
+
+		private static bool ApplyWhipStrikeOnPlayer(
+					Player player,
+					Vector2 direction,
+					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
+			var checkedPlayers = new HashSet<Player>();
+			bool isPlayerHit = false;
+
+			foreach( (Vector2 target, IEnumerable<Player> plrs) in hitPlayersAt ) {
+				foreach( Player plr in plrs ) {
+					isPlayerHit = true;
+					if( checkedPlayers.Contains( plr ) ) { continue; }
+					checkedPlayers.Add( plr );
+
+					BullwhipItem.StrikePlayer( player, direction, target, plr );
+				}
+			}
+
+			return isPlayerHit;
+		}
+
 
 		////////////////
 
 		public static void StrikeNPC( Player player, Vector2 direction, Vector2 hitWorldPosition, NPC npc ) {
-			if( npc.immortal ) {
+			if( npc.immortal || npc.dontTakeDamage ) {
 				return;
 			}
 
@@ -140,8 +193,12 @@ namespace Bullwhip.Items {
 					}
 				}
 
-				npc.velocity += direction * kb;
+				Vector2 oldVel = npc.velocity;
+
 				npc.StrikeNPC( dmg, kb, player.direction );
+				if( oldVel != npc.velocity ) {
+					npc.velocity += direction * kb;
+				}
 
 				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
 				if( tricksterMod != null ) {
@@ -154,6 +211,7 @@ namespace Bullwhip.Items {
 			BullwhipItem.CreateHitEntityFx( npc.Center );
 //LogHelpers.Log("WHIP 3 "+npc.TypeName+" ("+npc.whoAmI+"), direction:"+direction.ToShortString()+", hitWorldPosition:"+hitWorldPosition.ToShortString());
 		}
+
 
 		private static void StrikeTrickster( NPC npc ) {
 			if( Main.netMode != 1 ) {
@@ -199,6 +257,22 @@ namespace Bullwhip.Items {
 
 		public static void StrikeItem( Player player, Vector2 direction, Vector2 hitWorldPosition, Item item ) {
 			item.position = player.position;
+		}
+
+
+		public static void StrikePlayer( Player player, Vector2 direction, Vector2 hitWorldPosition, Player targetPlr ) {
+			if( targetPlr.dead || targetPlr.immune ) {
+				return;
+			}
+
+			BullwhipConfig config = BullwhipConfig.Instance;
+			int dmg = config.WhipDamage;
+			float kb = config.WhipKnockback;
+
+			targetPlr.velocity += direction * kb;
+			targetPlr.Hurt( PlayerDeathReason.ByPlayer(player.whoAmI), dmg, player.direction );
+
+			BullwhipItem.CreateHitEntityFx( targetPlr.Center );
 		}
 	}
 }

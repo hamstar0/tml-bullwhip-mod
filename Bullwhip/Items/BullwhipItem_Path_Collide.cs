@@ -50,6 +50,19 @@ namespace Bullwhip.Items {
 		}
 
 
+		private static IEnumerable<Player> FindWhipPlayerCollisionAt( Vector2 wldPos ) {
+			int plrRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
+			plrRadiusSqr *= plrRadiusSqr;
+
+			return Main.player.Where( anyPlr => {
+				if( anyPlr == null || !anyPlr.active || anyPlr.dead ) {
+					return false;
+				}
+				return Vector2.DistanceSquared(anyPlr.Center, wldPos) < plrRadiusSqr;
+			} );
+		}
+
+
 		////
 
 		private static bool FindWhipTileCollisionAt( int tileX, int tileY, out bool isPlatform, out bool isBreakable ) {
