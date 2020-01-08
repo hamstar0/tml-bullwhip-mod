@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using HamstarHelpers.Classes.Errors;
 using HamstarHelpers.Helpers.Debug;
 using Bullwhip.Items;
 using System;
@@ -75,11 +76,23 @@ namespace Bullwhip.Projectiles {
 			//ownerPlr.itemTime = ownerPlr.itemAnimation;
 
 			if( Main.netMode != 2 ) {
-				if( Main.myPlayer == ownerPlr.whoAmI ) {
+				if( Main.myPlayer == this.projectile.owner ) {
 					this.UpdatePosition();
-					NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, this.projectile.whoAmI );
+					if( Main.netMode != 0 ) {
+						NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, this.projectile.whoAmI );
+					}
+				} else {
+					this.projectile.spriteDirection = (int)this.projectile.ai[1] / 1000;
+					this.projectile.rotation = this.projectile.ai[1] > 0f
+						? this.projectile.ai[1] - 1000f
+						: this.projectile.ai[1] + 1000f;
 				}
-			} else {
+			} else if( Main.netMode == 2 ) {
+				this.projectile.spriteDirection = (int)this.projectile.ai[1] / 1000;
+				this.projectile.rotation = this.projectile.ai[1] > 0f
+					? this.projectile.ai[1] - 1000f
+					: this.projectile.ai[1] + 1000f;
+
 				NetMessage.SendData( MessageID.SyncProjectile, -1, this.projectile.owner, null, this.projectile.whoAmI );
 			}
 
@@ -111,7 +124,8 @@ namespace Bullwhip.Projectiles {
 			Player ownerPlr = Main.player[this.projectile.owner];
 			Vector2 ownerMountedCenter = ownerPlr.RotatedRelativePoint( ownerPlr.MountedCenter, true );
 
-			this.projectile.direction = ownerPlr.direction;
+			this.projectile.spriteDirection = ownerPlr.direction;
+			//this.projectile.direction = ownerPlr.direction;
 			//this.projectile.Center = ownerMountedCenter - (Vector2.Normalize(this.projectile.velocity) * 12f);
 
 			//this.projectile.rotation = this.projectile.velocity.ToRotation();
@@ -128,8 +142,10 @@ namespace Bullwhip.Projectiles {
 
 			// Offset by 90 degrees here
 			if( this.projectile.spriteDirection == -1 ) {
-				this.projectile.rotation -= MathHelper.ToRadians( 90f );
+				this.projectile.rotation -= MathHelper.ToRadians( 180f );
 			}
+
+			this.projectile.ai[1] = this.projectile.rotation + (this.projectile.spriteDirection * 1000);
 		}
 
 
