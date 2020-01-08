@@ -1,0 +1,34 @@
+v2
+-	Implement tension between links
+-	Define linked (length constrained) strands
+-	Define strand
+
+
+v1.1
+-	Implement whip pvp
+
+v1
+-	Implement cobweb/plant destroying
+-	Implement projectile knocking
+-	Increase length
+-	Implement platform grab + pull
+-	Implement slimeshots (enraged slimes)
+-	Implement headshots
+-	Apply crack effect in 32x32 area (high knockback, low damage, incapacitates bats (AI change?))
+-	Add collision trace to tile or NPC (begins at halfway point)
+-	Use
+	-	Click release after attack animation finishes = grab
+	-	Click release before attack animation finishes = crack
+-	Define item (10 damage)
+-	Setup project
+-	Animate whip animation
+-	Create item sprite
+
+
+
+Idea junkyard
+-	Grab vine = pull towards it + release
+-	Create immobilize effect upon an NPC
+	-	Keep a line connected to NPC
+	-	Envelop NPC
+	-	While item is in inventory and player not too far away, keep envelop in effect
