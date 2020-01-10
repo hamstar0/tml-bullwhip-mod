@@ -50,12 +50,7 @@ namespace Bullwhip.Items {
 					}
 				}
 
-				Vector2 oldVel = npc.velocity;
-
 				npc.StrikeNPC( dmg, kb, player.direction );
-				if( oldVel != npc.velocity ) {
-					npc.velocity += direction * kb;
-				}
 
 				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
 				if( tricksterMod != null ) {
