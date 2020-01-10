@@ -25,8 +25,11 @@ namespace Bullwhip.Items {
 
 		public override void SetStaticDefaults() {
 			string tooltips = "Long reach, very low damage melee weapon"
-				+ "\nIncapacitates bats, enrages slimes, disorients fighters"
-				+ "\nMay attach to platforms or vines";
+				+ "\nIncapacitates bats, enrages slimes, disorients mobs";
+			if( BullwhipConfig.Instance.WhipLedgePullStrength > 0f ) {
+				tooltips += "\nMay attach to platforms or vines";
+			}
+
 			if( ModLoader.GetMod("TheTrickster") != null ) {
 				tooltips += "\nCan repel the Trickster";
 			}
