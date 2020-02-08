@@ -49,8 +49,8 @@ namespace Bullwhip {
 
 
 		[Range( 1, 128 )]
-		[DefaultValue( 28 )]//32
-		public int WhipNPCHitRadius { get; set; } = 28;
+		[DefaultValue( 32 )]
+		public int WhipNPCHitRadius { get; set; } = 32;
 
 		[Range( 1, 128 )]
 		[DefaultValue( 36 )]

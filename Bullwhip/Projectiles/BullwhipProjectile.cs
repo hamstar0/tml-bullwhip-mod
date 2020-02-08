@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
@@ -6,7 +7,6 @@ using Terraria.ModLoader;
 using HamstarHelpers.Classes.Errors;
 using HamstarHelpers.Helpers.Debug;
 using Bullwhip.Items;
-using System;
 
 
 namespace Bullwhip.Projectiles {
@@ -32,8 +32,8 @@ namespace Bullwhip.Projectiles {
 		}
 
 		public override void SetDefaults() {
-			this.projectile.width = 384;
-			this.projectile.height = 72;
+			this.projectile.width = 1;
+			this.projectile.height = 1;
 			this.projectile.aiStyle = -1;   // = 19;
 			this.projectile.penetrate = -1;
 
