@@ -32,8 +32,8 @@ namespace Bullwhip.Projectiles {
 		}
 
 		public override void SetDefaults() {
-			this.projectile.width = 1;
-			this.projectile.height = 1;
+			this.projectile.width = 384;
+			this.projectile.height = 72;
 			this.projectile.aiStyle = -1;   // = 19;
 			this.projectile.penetrate = -1;
 
@@ -121,7 +121,7 @@ namespace Bullwhip.Projectiles {
 		////////////////
 
 		private void UpdatePosition() {
-			Player ownerPlr = Main.player[this.projectile.owner];
+			Player ownerPlr = Main.player[ this.projectile.owner ];
 			Vector2 ownerMountedCenter = ownerPlr.RotatedRelativePoint( ownerPlr.MountedCenter, true );
 
 			this.projectile.spriteDirection = ownerPlr.direction;
@@ -136,7 +136,7 @@ namespace Bullwhip.Projectiles {
 			float swingDegrees = 180 + swingDegreesArc;
 			float swingRadians = MathHelper.ToRadians( swingDegrees );
 			var swingDir = new Vector2( (float)Math.Cos(swingRadians), (float)Math.Sin(swingRadians) );
-			var swingPos = ownerMountedCenter + ( swingDir * 10 );
+			var swingPos = ownerMountedCenter + (swingDir * 10f);
 
 			this.projectile.Center = swingPos;
 
