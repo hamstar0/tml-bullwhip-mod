@@ -1,64 +1,96 @@
-using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.Tiles.Attributes;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
+using HamstarHelpers.Helpers.Debug;
+using HamstarHelpers.Helpers.Tiles.Attributes;
 
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
+		public static Rectangle GetRectangle( Entity ent, int minBoxDim ) {
+			var rect = new Rectangle( (int)ent.position.X, (int)ent.position.Y, ent.width, ent.height );
+
+			if( rect.Width < minBoxDim ) {
+				rect.X = (rect.X + (rect.Width / 2)) - (minBoxDim / 2);
+				rect.Width = minBoxDim;
+			}
+			if( rect.Height < minBoxDim ) {
+				rect.Y = (rect.Y + (rect.Height / 2)) - (minBoxDim / 2);
+				rect.Height = minBoxDim;
+			}
+
+			return rect;
+		}
+
+
+		////////////////
+
 		private static IEnumerable<NPC> FindWhipNpcCollisionAt( Vector2 wldPos ) {
-			int npcRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
-			npcRadiusSqr *= npcRadiusSqr;
+			//float npcRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
 
 			return Main.npc.Where( anyNpc => {
 				if( anyNpc == null || !anyNpc.active || anyNpc.immortal ) {
 					return false;
 				}
-				float distSqr = Vector2.DistanceSquared( anyNpc.Center, wldPos );
-				return distSqr < npcRadiusSqr;
+
+				return BullwhipItem.GetRectangle( anyNpc, BullwhipConfig.Instance.WhipNPCMinHitRadius )
+					.Contains( (int)wldPos.X, (int)wldPos.Y );
+				/*float npcRadiusSqr = (anyNpc.width + anyNpc.height) / 2;
+				npcRadiusSqr *= npcRadiusSqr;
+
+				float hitDistSqr = Vector2.DistanceSquared( anyNpc.Center, wldPos );
+				return hitDistSqr < npcRadiusSqr;*/
 			} );
 		}
 		
 
 		private static IEnumerable<Projectile> FindWhipProjectileCollisionAt( Vector2 wldPos ) {
-			int projRadiusSqr = BullwhipConfig.Instance.WhipProjectileHitRadius;
-			projRadiusSqr *= projRadiusSqr;
+			//int projRadiusSqr = BullwhipConfig.Instance.WhipProjectileHitRadius;
+			//projRadiusSqr *= projRadiusSqr;
 
 			return Main.projectile.Where( anyProj => {
 				if( anyProj == null || !anyProj.active || !anyProj.hostile ) {
 					return false;
 				}
-				return Vector2.DistanceSquared(anyProj.Center, wldPos) < projRadiusSqr;
+
+				return BullwhipItem.GetRectangle( anyProj, BullwhipConfig.Instance.WhipProjectileMinHitRadius )
+					.Contains( (int)wldPos.X, (int)wldPos.Y );
+				//return Vector2.DistanceSquared(anyProj.Center, wldPos) < projRadiusSqr;
 			} );
 		}
 		
 
 		private static IEnumerable<Item> FindWhipItemCollisionAt( Vector2 wldPos ) {
-			int itemRadiusSqr = BullwhipConfig.Instance.WhipItemHitRadius;
-			itemRadiusSqr *= itemRadiusSqr;
+			//int itemRadiusSqr = BullwhipConfig.Instance.WhipItemHitRadius;
+			//itemRadiusSqr *= itemRadiusSqr;
 
 			return Main.item.Where( anyItem => {
 				if( anyItem == null || !anyItem.active ) {
 					return false;
 				}
-				return Vector2.DistanceSquared(anyItem.Center, wldPos) < itemRadiusSqr;
+
+				return BullwhipItem.GetRectangle( anyItem, BullwhipConfig.Instance.WhipItemHitMinRadius )
+					.Contains( (int)wldPos.X, (int)wldPos.Y );
+				//return Vector2.DistanceSquared(anyItem.Center, wldPos) < itemRadiusSqr;
 			} );
 		}
 
 
 		private static IEnumerable<Player> FindWhipPlayerCollisionAt( Vector2 wldPos ) {
-			int plrRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
-			plrRadiusSqr *= plrRadiusSqr;
+			//int plrRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
+			//plrRadiusSqr *= plrRadiusSqr;
 
 			return Main.player.Where( anyPlr => {
 				if( anyPlr == null || !anyPlr.active || anyPlr.dead ) {
 					return false;
 				}
-				return Vector2.DistanceSquared(anyPlr.Center, wldPos) < plrRadiusSqr;
+
+				return BullwhipItem.GetRectangle( anyPlr, BullwhipConfig.Instance.WhipNPCMinHitRadius )
+					.Contains( (int)wldPos.X, (int)wldPos.Y );
+				//return Vector2.DistanceSquared(anyPlr.Center, wldPos) < plrRadiusSqr;
 			} );
 		}
 

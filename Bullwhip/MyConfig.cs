@@ -1,8 +1,8 @@
-﻿using HamstarHelpers.Classes.UI.ModConfig;
-using HamstarHelpers.Services.Configs;
-using System;
+﻿using System;
 using System.ComponentModel;
 using Terraria.ModLoader.Config;
+using HamstarHelpers.Classes.UI.ModConfig;
+using HamstarHelpers.Services.Configs;
 
 
 namespace Bullwhip {
@@ -50,15 +50,15 @@ namespace Bullwhip {
 
 		[Range( 1, 128 )]
 		[DefaultValue( 32 )]
-		public int WhipNPCHitRadius { get; set; } = 32;
+		public int WhipNPCMinHitRadius { get; set; } = 32;
 
 		[Range( 1, 128 )]
 		[DefaultValue( 36 )]
-		public int WhipProjectileHitRadius { get; set; } = 36;
+		public int WhipProjectileMinHitRadius { get; set; } = 36;
 
 		[Range( 1, 128 )]
 		[DefaultValue( 36 )]
-		public int WhipItemHitRadius { get; set; } = 36;
+		public int WhipItemHitMinRadius { get; set; } = 36;
 
 
 		[DefaultValue( true )]

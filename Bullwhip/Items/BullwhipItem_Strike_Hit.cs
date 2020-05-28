@@ -77,7 +77,7 @@ namespace Bullwhip.Items {
 			
 			//NPCHelpers.Remove( npc );
 			var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
-			mynpc.Flee();
+			mynpc.FleeAction();
 
 			if( Main.netMode == 2 ) {
 				NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI );
