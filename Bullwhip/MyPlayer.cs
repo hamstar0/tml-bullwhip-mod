@@ -20,7 +20,7 @@ namespace Bullwhip {
 		////////////////
 
 		public override void SetupStartInventory( IList<Item> items, bool mediumcoreDeath ) {
-			if( !mediumcoreDeath && BullwhipConfig.Instance.PlayerSpawnsWithWhip ) {
+			if( !mediumcoreDeath && BullwhipConfig.Instance.Get<bool>(nameof(BullwhipConfig.PlayerSpawnsWithWhip)) ) {
 				var whip = new Item();
 				whip.SetDefaults( ModContent.ItemType<BullwhipItem>() );
 
@@ -49,7 +49,10 @@ namespace Bullwhip {
 
 		public override void PreUpdateMovement() {
 			if( this.PullHeading.HasValue ) {
-				this.player.velocity -= this.PullHeading.Value * BullwhipConfig.Instance.WhipLedgePullStrength;
+				var config = BullwhipConfig.Instance;
+				float ledgePullStr = config.Get<float>( nameof(BullwhipConfig.WhipLedgePullStrength) );
+
+				this.player.velocity -= this.PullHeading.Value * ledgePullStr;
 				this.PullHeading = null;
 			}
 		}

@@ -22,7 +22,7 @@ namespace Bullwhip.Items {
 					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
 					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
 //LogHelpers.Log("WHIP 2 - start:"+start.ToShortString()+", hitNpcsAt:"+hitNpcsAt.Count2D()+", hitProjsAt:"+hitProjsAt.Count2D()+", hitItemsAt:"+hitItemsAt.Count2D());
-			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipHitDist;
+			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			Vector2 maxPos = start + (direction * maxWhipDist);
 
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {

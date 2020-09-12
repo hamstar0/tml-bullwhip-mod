@@ -12,8 +12,8 @@ using Terraria.ModLoader;
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		public static void CastWhipStrike( Player player, Vector2 direction ) {
-			int minWhipDist = BullwhipConfig.Instance.MinimumWhipHitDist;
-			int maxWhipDist = BullwhipConfig.Instance.MaximumWhipHitDist;
+			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MinimumWhipHitDist) );
+			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			direction.Normalize();
 
 			Vector2 start = player.RotatedRelativePoint( player.MountedCenter, true );
@@ -156,13 +156,14 @@ namespace Bullwhip.Items {
 					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt,
 					ref bool hitNpc,
 					ref bool hitProj ) {
+			var config = BullwhipConfig.Instance;
 			int minDistSqr = minDist * minDist;
 			float distSqr = Vector2.DistanceSquared( start, wldPos );
 			if( distSqr < minDistSqr ) {
 				return;
 			}
 
-			int maxHits = BullwhipConfig.Instance.MaxWhipEntityHits;
+			int maxHits = config.Get<int>( nameof(BullwhipConfig.MaxWhipEntityHits) );
 			maxHits = maxHits == 0 ? Int32.MaxValue - 1 : maxHits;
 
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {

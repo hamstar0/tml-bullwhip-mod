@@ -36,7 +36,8 @@ namespace Bullwhip.Items {
 					return false;
 				}
 
-				return BullwhipItem.GetRectangle( anyNpc, BullwhipConfig.Instance.WhipNPCMinHitRadius )
+				var config = BullwhipConfig.Instance;
+				return BullwhipItem.GetRectangle( anyNpc, config.Get<int>(nameof(BullwhipConfig.WhipNPCMinHitRadius)) )
 					.Contains( (int)wldPos.X, (int)wldPos.Y );
 				/*float npcRadiusSqr = (anyNpc.width + anyNpc.height) / 2;
 				npcRadiusSqr *= npcRadiusSqr;
@@ -56,7 +57,8 @@ namespace Bullwhip.Items {
 					return false;
 				}
 
-				return BullwhipItem.GetRectangle( anyProj, BullwhipConfig.Instance.WhipProjectileMinHitRadius )
+				var config = BullwhipConfig.Instance;
+				return BullwhipItem.GetRectangle( anyProj, config.Get<int>(nameof(BullwhipConfig.WhipProjectileMinHitRadius)) )
 					.Contains( (int)wldPos.X, (int)wldPos.Y );
 				//return Vector2.DistanceSquared(anyProj.Center, wldPos) < projRadiusSqr;
 			} );
@@ -72,7 +74,8 @@ namespace Bullwhip.Items {
 					return false;
 				}
 
-				return BullwhipItem.GetRectangle( anyItem, BullwhipConfig.Instance.WhipItemHitMinRadius )
+				var config = BullwhipConfig.Instance;
+				return BullwhipItem.GetRectangle( anyItem, config.Get<int>(nameof(BullwhipConfig.WhipItemHitMinRadius)) )
 					.Contains( (int)wldPos.X, (int)wldPos.Y );
 				//return Vector2.DistanceSquared(anyItem.Center, wldPos) < itemRadiusSqr;
 			} );
@@ -88,7 +91,8 @@ namespace Bullwhip.Items {
 					return false;
 				}
 
-				return BullwhipItem.GetRectangle( anyPlr, BullwhipConfig.Instance.WhipNPCMinHitRadius )
+				var config = BullwhipConfig.Instance;
+				return BullwhipItem.GetRectangle( anyPlr, config.Get<int>(nameof(BullwhipConfig.WhipNPCMinHitRadius)) )
 					.Contains( (int)wldPos.X, (int)wldPos.Y );
 				//return Vector2.DistanceSquared(anyPlr.Center, wldPos) < plrRadiusSqr;
 			} );

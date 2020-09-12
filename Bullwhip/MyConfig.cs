@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using HamstarHelpers.Classes.UI.ModConfig;
-using HamstarHelpers.Services.Configs;
 
 
 namespace Bullwhip {
@@ -11,8 +11,8 @@ namespace Bullwhip {
 
 
 
-	public partial class BullwhipConfig : StackableModConfig {
-		public static BullwhipConfig Instance => ModConfigStack.GetMergedConfigs<BullwhipConfig>();
+	public partial class BullwhipConfig : ModConfig {
+		public static BullwhipConfig Instance => ModContent.GetInstance<BullwhipConfig>();
 
 
 

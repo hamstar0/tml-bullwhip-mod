@@ -152,6 +152,7 @@ namespace Bullwhip.Projectiles {
 		////////////////
 
 		private void StepThroughFrames() {
+			var config = BullwhipConfig.Instance;
 			Projectile proj = this.projectile;
 			bool anim = false;
 
@@ -186,7 +187,7 @@ namespace Bullwhip.Projectiles {
 
 				if( proj.frame == 4 ) {
 					var sndPos = proj.Center;
-					sndPos += Vector2.Normalize(proj.velocity) * BullwhipConfig.Instance.MaximumWhipHitDist;
+					sndPos += Vector2.Normalize(proj.velocity) * config.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 
 					BullwhipItem.PlaySound( sndPos );
 				}

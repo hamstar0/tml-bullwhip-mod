@@ -16,10 +16,10 @@ namespace Bullwhip.Items {
 				return;
 			}
 
-			BullwhipConfig config = BullwhipConfig.Instance;
+			var config = BullwhipConfig.Instance;
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
-			int dmg = config.WhipDamage;
-			float kb = config.WhipKnockback;
+			int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
+			float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
 
 			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
 				NPCHelpers.Kill( npc );
@@ -34,7 +34,7 @@ namespace Bullwhip.Items {
 					}
 					break;
 				case 14:    // bats
-					if( BullwhipConfig.Instance.IncapacitatesBats && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
+					if( config.Get<bool>(nameof(BullwhipConfig.IncapacitatesBats)) && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
 						npc.aiStyle = 16;
 						kb = 1f;
 					}
@@ -44,7 +44,8 @@ namespace Bullwhip.Items {
 				if( !mynpc.IsConfuseWhipped ) {
 					// Doesn't work on slimes
 					if( npc.aiStyle != 1 ) {
-						if( TmlHelpers.SafelyGetRand().NextFloat() <= config.WhipConfuseChance ) {
+						float confuseChance = config.Get<float>( nameof(BullwhipConfig.WhipConfuseChance) );
+						if( TmlHelpers.SafelyGetRand().NextFloat() <= confuseChance ) {
 							BullwhipItem.ApplyConfuse( npc );
 						}
 					}
@@ -118,8 +119,8 @@ namespace Bullwhip.Items {
 			}
 
 			BullwhipConfig config = BullwhipConfig.Instance;
-			int dmg = config.WhipDamage;
-			float kb = config.WhipKnockback;
+			int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
+			float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
 
 			targetPlr.velocity += direction * kb;
 			targetPlr.Hurt( PlayerDeathReason.ByPlayer(player.whoAmI), dmg, player.direction );

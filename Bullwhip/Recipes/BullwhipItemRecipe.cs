@@ -16,7 +16,7 @@ namespace Bullwhip.Recipes {
 
 
 		public override bool RecipeAvailable() {
-			return BullwhipConfig.Instance.RecipeEnabled;
+			return BullwhipConfig.Instance.Get<bool>( nameof(BullwhipConfig.RecipeEnabled) );
 		}
 	}
 }
