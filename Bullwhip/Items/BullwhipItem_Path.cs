@@ -1,16 +1,20 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Terraria;
+using Terraria.ModLoader;
 using HamstarHelpers.Helpers.Collisions;
 using HamstarHelpers.Helpers.Debug;
 using HamstarHelpers.Helpers.DotNET.Extensions;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Terraria;
-using Terraria.ModLoader;
 
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
+		/// <summary>
+		/// Casts a whip strike in a given direction. First step in the whip attack process.
+		/// </summary>
+		/// <param name="player"></param>
+		/// <param name="direction"></param>
 		public static void CastWhipStrike( Player player, Vector2 direction ) {
 			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MinimumWhipHitDist) );
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
@@ -38,11 +42,11 @@ namespace Bullwhip.Items {
 				maxDist: maxWhipDist,
 				hitTileAt: out hitTileAt,
 				hitPlatformAt: out hitPlatformAt,
-				breakables: breakables,
-				hitNpcsAt: hitNpcsAt,
-				hitProjsAt: hitProjsAt,
-				hitItemsAt: hitItemsAt,
-				hitPlayersAt: hitPlayersAt
+				breakables: ref breakables,
+				hitNpcsAt: ref hitNpcsAt,
+				hitProjsAt: ref hitProjsAt,
+				hitItemsAt: ref hitItemsAt,
+				hitPlayersAt: ref hitPlayersAt
 			);
 
 			///
@@ -63,6 +67,22 @@ namespace Bullwhip.Items {
 
 		////
 
+		/// <summary>
+		/// Casts a scan ray to determine what tile, breakable tiles, npcs, projectiles, items, or players get hit as if by
+		/// a whip strike.
+		/// </summary>
+		/// <param name="start"></param>
+		/// <param name="direction"></param>
+		/// <param name="minDist"></param>
+		/// <param name="maxDist"></param>
+		/// <param name="hitTileAt"></param>
+		/// <param name="hitPlatformAt"></param>
+		/// <param name="breakables"></param>
+		/// <param name="hitNpcsAt"></param>
+		/// <param name="hitProjsAt"></param>
+		/// <param name="hitItemsAt"></param>
+		/// <param name="hitPlayersAt"></param>
+		/// <returns>`true` if something gets hit.</returns>
 		public static bool CastWhipScanRay(
 					Vector2 start,
 					Vector2 direction,
@@ -70,31 +90,39 @@ namespace Bullwhip.Items {
 					int maxDist,
 					out (int TileX, int TileY)? hitTileAt,
 					out (int TileX, int TileY)? hitPlatformAt,
-					IDictionary<int, ISet<int>> breakables,
-					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
-					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
-					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
-					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
-			var hitTiles = new HashSet<(int, int)>();
-			(int TileX, int TileY)? myHitTileAt = null;
-			(int TileX, int TileY)? myHitPlatformAt = null;
-
+					ref IDictionary<int, ISet<int>> breakables,
+					ref IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
+					ref IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
+					ref IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
+					ref IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
+			var currHitNpcsAt = hitNpcsAt;
+			var currHitProjsAt = hitProjsAt;
+			var currHitItemsAt = hitItemsAt;
+			var currHitPlayersAt = hitPlayersAt;
 			bool hitNpc = false;
 			bool hitProj = false;
 			bool checkPerUnit( Vector2 wldPos ) {
 				BullwhipItem.CheckCollisionPerUnit(
-					start,
-					wldPos,
-					minDist,
-					hitNpcsAt,
-					hitProjsAt,
-					hitItemsAt,
-					hitPlayersAt,
-					ref hitNpc,
-					ref hitProj
+					start: start,
+					wldPos: wldPos,
+					minDist: minDist,
+					hitNpcsAt: ref currHitNpcsAt,
+					hitProjsAt: ref currHitProjsAt,
+					hitItemsAt: ref currHitItemsAt,
+					hitPlayersAt: ref currHitPlayersAt,
+					hitNpc: ref hitNpc,
+					hitProj: ref hitProj
 				);
 				return false;
 			};
+
+			//
+
+			var hitTiles = new HashSet<(int, int)>();
+			(int TileX, int TileY)? myHitTileAt = null;
+			(int TileX, int TileY)? myHitPlatformAt = null;
+
+			var currBreakables = breakables;
 
 			bool checkPerTile( int tileX, int tileY ) {
 				bool isTile, isPlatform, isBreakable;
@@ -103,7 +131,7 @@ namespace Bullwhip.Items {
 
 				// Account for adjacent breakable tiles
 				foreach( var xy in myBreakables ) {
-					breakables.Set2D( xy.TileX, xy.TileY );
+					currBreakables.Set2D( xy.TileX, xy.TileY );
 				}
 
 				if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
@@ -122,13 +150,13 @@ namespace Bullwhip.Items {
 				}
 				if( isBreakable ) {
 					isTile = false;
-					breakables.Set2D( tileX, tileY );
+					currBreakables.Set2D( tileX, tileY );
 				}
 
 				return isTile;
 			};
 
-			///
+			//
 
 			bool found = CollisionHelpers.CastRay(
 				worldPosition: start,
@@ -141,46 +169,6 @@ namespace Bullwhip.Items {
 			hitPlatformAt = myHitPlatformAt;
 			hitTileAt = myHitTileAt;
 			return found;
-		}
-
-
-		////////////////
-
-		private static void CheckCollisionPerUnit(
-					Vector2 start,
-					Vector2 wldPos,
-					int minDist,
-					IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
-					IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
-					IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
-					IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt,
-					ref bool hitNpc,
-					ref bool hitProj ) {
-			var config = BullwhipConfig.Instance;
-			int minDistSqr = minDist * minDist;
-			float distSqr = Vector2.DistanceSquared( start, wldPos );
-			if( distSqr < minDistSqr ) {
-				return;
-			}
-
-			int maxHits = config.Get<int>( nameof(BullwhipConfig.MaxWhipEntityHits) );
-			maxHits = maxHits == 0 ? Int32.MaxValue - 1 : maxHits;
-
-			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
-				Dust.QuickDust( wldPos, Color.Yellow );
-			}
-
-			if( !hitNpc ) {
-				hitNpcsAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
-			}
-			if( !hitProj ) {
-				hitProjsAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
-			}
-			hitItemsAt[wldPos] = BullwhipItem.FindWhipItemCollisionAt( wldPos );
-			hitPlayersAt[wldPos] = BullwhipItem.FindWhipPlayerCollisionAt( wldPos );
-
-			hitNpc = hitNpc		|| (hitNpcsAt[wldPos].ToArray().Length >= maxHits);
-			hitProj = hitProj	|| (hitProjsAt[wldPos].ToArray().Length >= maxHits);
 		}
 	}
 }

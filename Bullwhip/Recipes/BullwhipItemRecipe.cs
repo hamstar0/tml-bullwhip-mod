@@ -1,7 +1,7 @@
-using Bullwhip.Items;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Bullwhip.Items;
 
 
 namespace Bullwhip.Recipes {
