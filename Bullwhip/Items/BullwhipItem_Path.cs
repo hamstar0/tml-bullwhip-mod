@@ -65,7 +65,6 @@ namespace Bullwhip.Items {
 			);
 		}
 
-		////
 
 		/// <summary>
 		/// Casts a scan ray to determine what tile, breakable tiles, npcs, projectiles, items, or players get hit as if by
@@ -95,13 +94,27 @@ namespace Bullwhip.Items {
 					ref IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
 					ref IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
 					ref IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
+			bool isTileHit = false;
+			bool isCastStoppedExceptItems = false;
+
+			//
+
 			var currHitNpcsAt = hitNpcsAt;
 			var currHitProjsAt = hitProjsAt;
 			var currHitItemsAt = hitItemsAt;
 			var currHitPlayersAt = hitPlayersAt;
 			bool hitNpc = false;
 			bool hitProj = false;
+
 			bool checkPerUnit( Vector2 wldPos ) {
+				// Once we've hit a tile, only continue checking for items
+				if( isTileHit && !isCastStoppedExceptItems ) {
+					isCastStoppedExceptItems = true;
+					currHitNpcsAt = new Dictionary<Vector2, IEnumerable<NPC>>();
+					currHitProjsAt = new Dictionary<Vector2, IEnumerable<Projectile>>();
+					currHitPlayersAt = new Dictionary<Vector2, IEnumerable<Player>>();
+				}
+
 				BullwhipItem.CheckCollisionPerUnit(
 					start: start,
 					wldPos: wldPos,
@@ -153,6 +166,7 @@ namespace Bullwhip.Items {
 					currBreakables.Set2D( tileX, tileY );
 				}
 
+				isTileHit = isTile;
 				return isTile;
 			};
 
@@ -162,6 +176,7 @@ namespace Bullwhip.Items {
 				worldPosition: start,
 				direction: direction,
 				maxWorldDistance: maxDist,
+				bothChecksOnly: false,
 				checkPerUnit: checkPerUnit,
 				checkPerTile: checkPerTile
 			);
