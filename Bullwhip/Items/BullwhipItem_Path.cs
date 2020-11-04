@@ -103,16 +103,14 @@ namespace Bullwhip.Items {
 			var currHitProjsAt = hitProjsAt;
 			var currHitItemsAt = hitItemsAt;
 			var currHitPlayersAt = hitPlayersAt;
-			bool hitNpc = false;
-			bool hitProj = false;
 
 			bool checkPerUnit( Vector2 wldPos ) {
 				// Once we've hit a tile, only continue checking for items
 				if( isTileHit && !isCastStoppedExceptItems ) {
 					isCastStoppedExceptItems = true;
-					currHitNpcsAt = new Dictionary<Vector2, IEnumerable<NPC>>();
-					currHitProjsAt = new Dictionary<Vector2, IEnumerable<Projectile>>();
-					currHitPlayersAt = new Dictionary<Vector2, IEnumerable<Player>>();
+					currHitNpcsAt = null;
+					currHitProjsAt = null;
+					currHitPlayersAt = null;
 				}
 
 				BullwhipItem.CheckCollisionPerUnit(
@@ -123,9 +121,17 @@ namespace Bullwhip.Items {
 					hitProjsAt: ref currHitProjsAt,
 					hitItemsAt: ref currHitItemsAt,
 					hitPlayersAt: ref currHitPlayersAt,
-					hitNpc: ref hitNpc,
-					hitProj: ref hitProj
+					hitNpc: out bool hitNpc,
+					hitProj: out bool hitProj
 				);
+
+				if( hitNpc ) {
+					currHitNpcsAt = null;
+				}
+				if( hitProj ) {
+					currHitProjsAt = null;
+				}
+
 				return false;
 			};
 
@@ -138,13 +144,17 @@ namespace Bullwhip.Items {
 			var currBreakables = breakables;
 
 			bool checkPerTile( int tileX, int tileY ) {
+				if( isTileHit ) {
+					return false;
+				}
+
 				bool isTile, isPlatform, isBreakable;
 				isTile = BullwhipItem.FindWhipTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
 				IEnumerable<(int TileX, int TileY)> myBreakables = BullwhipItem.FindNearbyBreakableTiles( tileX, tileY );
 
 				// Account for adjacent breakable tiles
-				foreach( var xy in myBreakables ) {
-					currBreakables.Set2D( xy.TileX, xy.TileY );
+				foreach( (int breakableTileX, int breakableTileY) in myBreakables ) {
+					currBreakables.Set2D( breakableTileX, breakableTileY );
 				}
 
 				if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
@@ -167,7 +177,7 @@ namespace Bullwhip.Items {
 				}
 
 				isTileHit = isTile;
-				return isTile;
+				return false;   //used to use isTile
 			};
 
 			//

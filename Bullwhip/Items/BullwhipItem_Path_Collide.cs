@@ -47,8 +47,11 @@ namespace Bullwhip.Items {
 					ref IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
 					ref IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
 					ref IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt,
-					ref bool hitNpc,
-					ref bool hitProj ) {
+					out bool hitNpc,
+					out bool hitProj ) {
+			hitNpc = false;
+			hitProj = false;
+
 			var config = BullwhipConfig.Instance;
 			int minDistSqr = minDist * minDist;
 			float distSqr = Vector2.DistanceSquared( start, wldPos );
@@ -63,17 +66,20 @@ namespace Bullwhip.Items {
 				Dust.QuickDust( wldPos, Color.Yellow );
 			}
 
-			if( !hitNpc ) {
+			if( hitNpcsAt != null ) {
 				hitNpcsAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
+				hitNpc = hitNpcsAt[wldPos].ToArray().Length >= maxHits;
 			}
-			if( !hitProj ) {
+			if( hitProjsAt != null ) {
 				hitProjsAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
+				hitProj = hitProjsAt[wldPos].ToArray().Length >= maxHits;
 			}
-			hitItemsAt[wldPos] = BullwhipItem.FindWhipItemCollisionAt( wldPos );
-			hitPlayersAt[wldPos] = BullwhipItem.FindWhipPlayerCollisionAt( wldPos );
-
-			hitNpc = hitNpc || ( hitNpcsAt[wldPos].ToArray().Length >= maxHits );
-			hitProj = hitProj || ( hitProjsAt[wldPos].ToArray().Length >= maxHits );
+			if( hitItemsAt != null ) {
+				hitItemsAt[wldPos] = BullwhipItem.FindWhipItemCollisionAt( wldPos );
+			}
+			if( hitPlayersAt != null ) {
+				hitPlayersAt[wldPos] = BullwhipItem.FindWhipPlayerCollisionAt( wldPos );
+			}
 		}
 	}
 }
