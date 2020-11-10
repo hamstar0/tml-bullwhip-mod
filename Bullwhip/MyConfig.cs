@@ -65,10 +65,10 @@ namespace Bullwhip {
 		public bool IncapacitatesBats { get; set; } = true;
 
 
-		[DefaultValue( 11.4f )]
 		[Range( 0f, 100f )]
+		[DefaultValue( 0f )] //11.4f
 		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
-		public float WhipLedgePullStrength { get; set; } = 11.4f;
+		public float WhipLedgePullStrength { get; set; } = 0f;
 
 
 		[Range( 0, 16 )]

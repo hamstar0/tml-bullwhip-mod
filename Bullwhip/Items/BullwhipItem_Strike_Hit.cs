@@ -1,12 +1,12 @@
-using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.NPCs;
-using HamstarHelpers.Helpers.TModLoader;
-using Microsoft.Xna.Framework;
 using System;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
+using HamstarHelpers.Helpers.Debug;
+using HamstarHelpers.Helpers.NPCs;
+using HamstarHelpers.Helpers.TModLoader;
 
 
 namespace Bullwhip.Items {

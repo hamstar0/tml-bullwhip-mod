@@ -64,17 +64,17 @@ namespace Bullwhip.Items {
 		}
 
 
-		private static IEnumerable<Player> FindWhipPlayerCollisionAt( Vector2 wldPos ) {
+		private static IEnumerable<Player> FindWhipPlayerCollisionAt( Player whipOwner, Vector2 wldPos ) {
 			//int plrRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
 			//plrRadiusSqr *= plrRadiusSqr;
 
-			return Main.player.Where( anyPlr => {
-				if( anyPlr == null || !anyPlr.active || anyPlr.dead ) {
+			return Main.player.Where( plr => {
+				if( plr == null || !plr.active || plr.dead || plr.whoAmI == whipOwner.whoAmI ) {
 					return false;
 				}
 
 				var config = BullwhipConfig.Instance;
-				return BullwhipItem.GetRectangle( anyPlr, config.Get<int>(nameof(BullwhipConfig.WhipNPCMinHitRadius)) )
+				return BullwhipItem.GetRectangle( plr, config.Get<int>(nameof(BullwhipConfig.WhipNPCMinHitRadius)) )
 					.Contains( (int)wldPos.X, (int)wldPos.Y );
 				//return Vector2.DistanceSquared(anyPlr.Center, wldPos) < plrRadiusSqr;
 			} );

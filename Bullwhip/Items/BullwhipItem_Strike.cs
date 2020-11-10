@@ -11,7 +11,7 @@ using HamstarHelpers.Helpers.DotNET.Extensions;
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		public static void ApplyWhipStrike(
-					Player player,
+					Player whipOwner,
 					Vector2 start,
 					Vector2 direction,
 					(int TileX, int TileY)? hitTileAt,
@@ -42,14 +42,14 @@ namespace Bullwhip.Items {
 				}
 			}
 
-			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPC( player, direction, hitNpcsAt );
-			BullwhipItem.ApplyWhipStrikeOnProjectile( player, direction, hitProjsAt );
-			BullwhipItem.ApplyWhipStrikeOnItem( player, direction, hitItemsAt );
-			BullwhipItem.ApplyWhipStrikeOnPlayer( player, direction, hitPlayersAt );
+			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPC( whipOwner, direction, hitNpcsAt );
+			BullwhipItem.ApplyWhipStrikeOnProjectile( whipOwner, direction, hitProjsAt );
+			BullwhipItem.ApplyWhipStrikeOnItem( whipOwner, direction, hitItemsAt );
+			BullwhipItem.ApplyWhipStrikeOnPlayer( whipOwner, direction, hitPlayersAt );
 
 			if( !isNpcHit ) {
 				if( hitPlatformAt.HasValue ) {
-					BullwhipItem.GrabPlatform( player, hitPlatformAt.Value.TileX, hitPlatformAt.Value.TileY );
+					BullwhipItem.GrabPlatform( whipOwner, hitPlatformAt.Value.TileX, hitPlatformAt.Value.TileY );
 				}
 			}
 

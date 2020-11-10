@@ -30,6 +30,7 @@ namespace Bullwhip.Items {
 		/// <summary>
 		/// Performs a collision check at a given world position. A step along the way of a ray cast.
 		/// </summary>
+		/// <param name="whipOwner"></param>
 		/// <param name="start"></param>
 		/// <param name="wldPos"></param>
 		/// <param name="minDist"></param>
@@ -40,6 +41,7 @@ namespace Bullwhip.Items {
 		/// <param name="hitNpc"></param>
 		/// <param name="hitProj"></param>
 		private static void CheckCollisionPerUnit(
+					Player whipOwner,
 					Vector2 start,
 					Vector2 wldPos,
 					int minDist,
@@ -78,7 +80,7 @@ namespace Bullwhip.Items {
 				hitItemsAt[wldPos] = BullwhipItem.FindWhipItemCollisionAt( wldPos );
 			}
 			if( hitPlayersAt != null ) {
-				hitPlayersAt[wldPos] = BullwhipItem.FindWhipPlayerCollisionAt( wldPos );
+				hitPlayersAt[wldPos] = BullwhipItem.FindWhipPlayerCollisionAt( whipOwner, wldPos );
 			}
 		}
 	}

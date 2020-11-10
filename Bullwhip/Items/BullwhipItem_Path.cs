@@ -36,6 +36,7 @@ namespace Bullwhip.Items {
 			///
 
 			bool hitAnything = BullwhipItem.CastWhipScanRay(
+				whipOwner: player,
 				start: start,
 				direction: direction,
 				minDist: minWhipDist,
@@ -52,7 +53,7 @@ namespace Bullwhip.Items {
 			///
 
 			BullwhipItem.ApplyWhipStrike(
-				player: player,
+				whipOwner: player,
 				start: start,
 				direction: direction,
 				breakables: breakables,
@@ -70,6 +71,7 @@ namespace Bullwhip.Items {
 		/// Casts a scan ray to determine what tile, breakable tiles, npcs, projectiles, items, or players get hit as if by
 		/// a whip strike.
 		/// </summary>
+		/// <param name="whipOwner"></param>
 		/// <param name="start"></param>
 		/// <param name="direction"></param>
 		/// <param name="minDist"></param>
@@ -83,6 +85,7 @@ namespace Bullwhip.Items {
 		/// <param name="hitPlayersAt"></param>
 		/// <returns>`true` if something gets hit.</returns>
 		public static bool CastWhipScanRay(
+					Player whipOwner,
 					Vector2 start,
 					Vector2 direction,
 					int minDist,
@@ -114,6 +117,7 @@ namespace Bullwhip.Items {
 				}
 
 				BullwhipItem.CheckCollisionPerUnit(
+					whipOwner: whipOwner,
 					start: start,
 					wldPos: wldPos,
 					minDist: minDist,

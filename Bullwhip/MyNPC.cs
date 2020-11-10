@@ -1,8 +1,8 @@
-﻿using HamstarHelpers.Helpers.Debug;
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using HamstarHelpers.Helpers.Debug;
 
 
 namespace Bullwhip {
@@ -20,7 +20,9 @@ namespace Bullwhip {
 		////////////////
 
 		public void ApplyEnrage( NPC npc ) {
-			if( this.IsEnraged ) { return; }
+			if( this.IsEnraged ) {
+				return;
+			}
 
 			switch( npc.netID ) {
 			case NPCID.BunnySlimed:

@@ -50,9 +50,12 @@ namespace Bullwhip {
 		public override void PreUpdateMovement() {
 			if( this.PullHeading.HasValue ) {
 				var config = BullwhipConfig.Instance;
-				float ledgePullStr = config.Get<float>( nameof(BullwhipConfig.WhipLedgePullStrength) );
+				float ledgePullStr = config.Get<float>( nameof(config.WhipLedgePullStrength) );
 
-				this.player.velocity -= this.PullHeading.Value * ledgePullStr;
+				if( ledgePullStr > 0 ) {
+					this.player.velocity -= this.PullHeading.Value * ledgePullStr;
+				}
+
 				this.PullHeading = null;
 			}
 		}
