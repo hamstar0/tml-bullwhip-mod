@@ -16,40 +16,14 @@ namespace Bullwhip.Items {
 				return;
 			}
 
-			var config = BullwhipConfig.Instance;
-			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
-			int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
-			float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
-
 			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
 				NPCHelpers.Kill( npc );
 			} else {
-				switch( npc.aiStyle ) {
-				case 1:     // slimes
-					BullwhipItem.ApplySlimeshot( npc );
-					break;
-				case 3:     // fighters
-					if( !mynpc.IsConfuseWhipped && BullwhipItem.IsHeadshot( npc, hitWorldPosition ) ) {
-						BullwhipItem.ApplyConfuse( npc );
-					}
-					break;
-				case 14:    // bats
-					if( config.Get<bool>(nameof(BullwhipConfig.IncapacitatesBats)) && npc.aiStyle == 14 ) {//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
-						npc.aiStyle = 16;
-						kb = 1f;
-					}
-					break;
-				}
+				var config = BullwhipConfig.Instance;
+				int dmg = config.Get<int>( nameof( config.WhipDamage ) );
+				float kb = config.Get<float>( nameof( config.WhipKnockback ) );
 
-				if( !mynpc.IsConfuseWhipped ) {
-					// Doesn't work on slimes
-					if( npc.aiStyle != 1 ) {
-						float confuseChance = config.Get<float>( nameof(BullwhipConfig.WhipConfuseChance) );
-						if( TmlHelpers.SafelyGetRand().NextFloat() <= confuseChance ) {
-							BullwhipItem.ApplyConfuse( npc );
-						}
-					}
-				}
+				BullwhipItem.StrikeNPC_AI( player, hitWorldPosition, npc, ref kb );
 
 				npc.StrikeNPC( dmg, kb, player.direction );
 
@@ -65,6 +39,45 @@ namespace Bullwhip.Items {
 //LogHelpers.Log("WHIP 3 "+npc.TypeName+" ("+npc.whoAmI+"), direction:"+direction.ToShortString()+", hitWorldPosition:"+hitWorldPosition.ToShortString());
 		}
 
+		////
+		
+		private static void StrikeNPC_AI( Player player, Vector2 hitWorldPosition, NPC npc, ref float knockback ) {
+			var config = BullwhipConfig.Instance;
+			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
+
+			switch( npc.aiStyle ) {
+			case 1:     // slimes
+				BullwhipItem.ApplySlimeshot( npc );
+				break;
+			case 3:     // fighters
+				if( !mynpc.IsConfuseWhipped && BullwhipItem.IsHeadshot( npc, hitWorldPosition ) ) {
+					BullwhipItem.ApplyConfuse( npc );
+				}
+				break;
+			case 14:    // bats
+				if( config.Get<bool>( nameof(BullwhipConfig.IncapacitatesBats) ) ) {
+					//if( npc.aiStyle == 14 ) {	//&& NPCID.Search.GetName(npc.type).Contains("Bat") ) {
+					npc.aiStyle = 16;
+					knockback = 1f;
+
+					mynpc.IsCrippleWhipped = true;
+				}
+				break;
+			}
+
+			if( !mynpc.IsConfuseWhipped ) {
+				// Doesn't work on slimes
+				if( npc.aiStyle != 1 ) {
+					float confuseChance = config.Get<float>( nameof( BullwhipConfig.WhipConfuseChance ) );
+					if( TmlHelpers.SafelyGetRand().NextFloat() <= confuseChance ) {
+						BullwhipItem.ApplyConfuse( npc );
+					}
+				}
+			}
+		}
+
+
+		////
 
 		private static void StrikeTrickster( NPC npc ) {
 			if( Main.netMode != 1 ) {
@@ -72,19 +85,20 @@ namespace Bullwhip.Items {
 			}
 
 			var rand = TmlHelpers.SafelyGetRand();
-			if( !rand.NextBool() ) {
-				return;
-			}
-			
-			//NPCHelpers.Remove( npc );
-			var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
-			mynpc.FleeAction();
 
-			if( Main.netMode == 2 ) {
-				NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI );
+			if( rand.NextBool() ) {	// 50% chance
+				//NPCHelpers.Remove( npc );
+				var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
+				mynpc.FleeAction();
+
+				if( Main.netMode == 2 ) {
+					NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI );
+				}
 			}
 		}
 
+
+		////////////////
 
 		public static void StrikeProjectile( Player player, Vector2 direction, Vector2 hitWorldPosition, Projectile proj ) {
 			BullwhipConfig config = BullwhipConfig.Instance;
@@ -108,10 +122,14 @@ namespace Bullwhip.Items {
 		}
 
 
+		////////////////
+
 		public static void StrikeItem( Player player, Vector2 direction, Vector2 hitWorldPosition, Item item ) {
 			item.position = player.position;
 		}
 
+
+		////////////////
 
 		public static void StrikePlayer( Player player, Vector2 direction, Vector2 hitWorldPosition, Player targetPlr ) {
 			if( targetPlr.dead || targetPlr.immune ) {

@@ -7,14 +7,46 @@ using HamstarHelpers.Helpers.Debug;
 
 namespace Bullwhip {
 	class BullwhipNPC : GlobalNPC {
+		private int WaterEscapeTickDurationBuffer = 0;
+
+
+		////////////////
+
 		public bool IsEnraged { get; private set; } = false;
 		public bool IsConfuseWhipped { get; internal set; } = false;
+		public bool IsCrippleWhipped { get; internal set; } = false;
 
 		////
 
 		public override bool InstancePerEntity => true;
 		public override bool CloneNewInstances => false;
 
+
+
+		////////////////
+
+		public override bool PreAI( NPC npc ) {
+			if( this.IsCrippleWhipped ) {
+				this.WaterEscapeTickDurationBuffer--;
+
+				switch( npc.aiStyle ) {
+				case 1:    // slime
+					if( !npc.wet && this.WaterEscapeTickDurationBuffer <= 0 ) {
+						npc.aiStyle = 16;
+					}
+					break;
+				case 16:	// "fish"
+					if( npc.wet ) {
+						this.WaterEscapeTickDurationBuffer = 90;
+
+						npc.aiStyle = 1;
+					}
+					break;
+				}
+			}
+
+			return base.PreAI( npc );
+		}
 
 
 		////////////////
@@ -65,18 +97,18 @@ namespace Bullwhip {
 				npc.GetGlobalNPC<BullwhipNPC>().IsEnraged = true;
 				break;
 			case NPCID.Pinky:
-				npc.aiStyle = 2;
+				npc.aiStyle = 2;	// Wheeee!
 				npc.defense += 5;
 				npc.knockBackResist -= 0.35f;
-				this.IsEnraged = true;
+				npc.GetGlobalNPC<BullwhipNPC>().IsEnraged = true;
 				//if( rand.Next( 4 ) == 0 ) {
-				//	npc.SetDefaults( NPCID.Gastropod );	<- Drops Blessed Apple
-				//	mynpc.IsEnraged = true;
+				//	npc.SetDefaults( NPCID.Gastropod );	<- Drops Blessed Apple :(
+				//	this.IsEnraged = true;
 				//}
 				break;
 			}
 
-			if( Main.netMode == 2 ) {
+			if( Main.netMode == NetmodeID.Server ) {
 				NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI, 0f, 0f, 0f, 0, 0, 0 );
 			}
 
