@@ -23,6 +23,10 @@ namespace Bullwhip.Items {
 				int dmg = config.Get<int>( nameof( config.WhipDamage ) );
 				float kb = config.Get<float>( nameof( config.WhipKnockback ) );
 
+				if( npc.aiStyle == 1 ) {	// slimes
+					kb *= 0.65f;
+				}
+
 				BullwhipItem.StrikeNPC_AI( player, hitWorldPosition, npc, ref kb );
 
 				npc.StrikeNPC( dmg, kb, player.direction );
@@ -89,7 +93,7 @@ namespace Bullwhip.Items {
 			if( rand.NextBool() ) {	// 50% chance
 				//NPCHelpers.Remove( npc );
 				var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
-				mynpc.FleeAction();
+				mynpc.FleeAction( false );
 
 				if( Main.netMode == 2 ) {
 					NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI );
