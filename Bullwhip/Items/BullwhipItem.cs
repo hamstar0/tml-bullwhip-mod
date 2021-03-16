@@ -1,10 +1,11 @@
-using Bullwhip.Projectiles;
-using Bullwhip.Recipes;
-using Microsoft.Xna.Framework.Audio;
 using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Bullwhip.Projectiles;
+using Bullwhip.Recipes;
 
 
 namespace Bullwhip.Items {
@@ -71,7 +72,7 @@ Main.NewText("1 "+player.ownedProjectileCounts[ this.item.shoot ]);
 			return player.ownedProjectileCounts[ this.item.shoot ] < 1;
 		}*/
 
-		/*public override bool Shoot(
+		public override bool Shoot(
 					Player player,
 					ref Vector2 position,
 					ref float speedX,
@@ -79,16 +80,22 @@ Main.NewText("1 "+player.ownedProjectileCounts[ this.item.shoot ]);
 					ref int type,
 					ref int damage,
 					ref float knockBack ) {
+			if( this.IsWhipping ) {
+				return false;
+			}
+
 			return base.Shoot( player, ref position, ref speedX, ref speedY, ref type, ref damage, ref knockBack );
-		}*/
+		}
 
 
 		////////////////
 
-		public void UpdateWhip( Player player ) {
+		public void UpdateWhipForPlayer( Player player ) {
 			if( !this.IsWhipping ) {
 				this.IsWhipping = player.itemAnimation > 0;
-			} else {
+			}
+
+			if( this.IsWhipping ) {
 				if( player.itemAnimation > 0 ) {
 					if( Main.mouseLeftRelease ) {
 						this.IsWhippingOnce = true;

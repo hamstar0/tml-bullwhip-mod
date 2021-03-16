@@ -112,9 +112,10 @@ namespace Bullwhip.Projectiles {
 		}
 
 		public override void Kill( int timeLeft ) {
-			Player ownerPlr = Main.player[this.projectile.owner];
+			Player plr = Main.player[this.projectile.owner];
+
 //LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
-			BullwhipItem.CastWhipStrike( ownerPlr, this.projectile.velocity );
+			BullwhipItem.CastWhipStrike( plr, this.projectile.velocity );
 		}
 
 

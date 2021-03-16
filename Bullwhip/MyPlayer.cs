@@ -40,8 +40,8 @@ namespace Bullwhip {
 		private void PreUpdateLocal() {
 			Item whip = this.player.HeldItem;
 
-			if( (whip?.active ?? false) && whip.type == ModContent.ItemType<BullwhipItem>() ) {
-				((BullwhipItem)whip.modItem)?.UpdateWhip( this.player );
+			if( whip?.active == true && whip.type == ModContent.ItemType<BullwhipItem>() ) {
+				((BullwhipItem)whip.modItem)?.UpdateWhipForPlayer( this.player );
 			}
 		}
 
