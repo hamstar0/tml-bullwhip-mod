@@ -7,7 +7,7 @@ using HamstarHelpers.Helpers.Debug;
 
 namespace Bullwhip {
 	class BullwhipNPC : GlobalNPC {
-		private int WaterEscapeTickDurationBuffer = 0;
+		//private int WaterEscapeTickDurationBuffer = 0;
 
 
 		////////////////
@@ -27,25 +27,29 @@ namespace Bullwhip {
 
 		public override bool PreAI( NPC npc ) {
 			if( this.IsCrippleWhipped ) {
-				this.WaterEscapeTickDurationBuffer--;
-
-				switch( npc.aiStyle ) {
-				case 1:    // slime
-					if( !npc.wet && this.WaterEscapeTickDurationBuffer <= 0 ) {
-						npc.aiStyle = 16;
-					}
-					break;
-				case 16:	// "fish"
-					if( npc.wet ) {
-						this.WaterEscapeTickDurationBuffer = 90;
-
-						npc.aiStyle = 1;
-					}
-					break;
-				}
+				this.ApplyCrippledState( npc );
 			}
 
 			return base.PreAI( npc );
+		}
+
+		private void ApplyCrippledState( NPC npc ) {
+			/*this.WaterEscapeTickDurationBuffer--;
+
+			switch( npc.aiStyle ) {
+			case 1:    // slime
+				if( !npc.wet && this.WaterEscapeTickDurationBuffer <= 0 ) {
+					npc.aiStyle = 16;	// fish
+				}
+				break;
+			case 16:	// "fish"
+				if( npc.wet ) {
+					this.WaterEscapeTickDurationBuffer = 90;
+
+					npc.aiStyle = 1;	// slime
+				}
+				break;
+			}*/
 		}
 
 
