@@ -11,7 +11,7 @@ using Bullwhip.Recipes;
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		private bool IsWhipping = false;
-		private bool IsWhippingOnce = false;
+		//private bool IsWhippingOnce = false;
 
 		private SoundEffectInstance SoundInstance = null;
 
@@ -80,18 +80,16 @@ Main.NewText("1 "+player.ownedProjectileCounts[ this.item.shoot ]);
 					ref int type,
 					ref int damage,
 					ref float knockBack ) {
-			if( this.IsWhipping ) {
-				return false;
-			}
-
-			return base.Shoot( player, ref position, ref speedX, ref speedY, ref type, ref damage, ref knockBack );
+			bool isAttemptingWhip = Main.mouseLeft && player.itemAnimation <= 3;
+			return !this.IsWhipping || isAttemptingWhip;
 		}
 
 
 		////////////////
 
 		public void UpdateWhipForPlayer( Player player ) {
-			if( !this.IsWhipping ) {
+			this.IsWhipping = player.itemAnimation > 0;
+			/*if( !this.IsWhipping ) {
 				this.IsWhipping = player.itemAnimation > 0;
 			}
 
@@ -101,14 +99,14 @@ Main.NewText("1 "+player.ownedProjectileCounts[ this.item.shoot ]);
 						this.IsWhippingOnce = true;
 					}
 				} else {
-					if( !this.IsWhippingOnce && Main.mouseLeft ) {
+					//if( !this.mouseLeftRelease && Main.mouseLeft ) {
 					//	BullwhipItem.AttemptWhipEnvelop( player );
-					}
+					//}
 
 					this.IsWhipping = false;
 					this.IsWhippingOnce = false;
 				}
-			}
+			}*/
 		}
 	}
 }
