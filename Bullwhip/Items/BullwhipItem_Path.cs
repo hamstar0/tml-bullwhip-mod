@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using HamstarHelpers.Helpers.Collisions;
-using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.DotNET.Extensions;
-
+using ModLibsCore.Libraries.Debug;
+using ModLibsCore.Libraries.DotNET.Extensions;
+using ModLibsGeneral.Libraries.Collisions;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
@@ -186,7 +185,7 @@ namespace Bullwhip.Items {
 
 			//
 
-			bool found = CollisionHelpers.CastRay(
+			bool found = CollisionLibraries.CastRay(
 				worldPosition: start,
 				direction: direction,
 				maxWorldDistance: maxDist,

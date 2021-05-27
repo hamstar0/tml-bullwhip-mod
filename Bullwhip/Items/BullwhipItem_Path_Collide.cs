@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using HamstarHelpers.Helpers.Debug;
+using ModLibsCore.Libraries.Debug;
 
 
 namespace Bullwhip.Items {

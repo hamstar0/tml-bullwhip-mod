@@ -4,8 +4,8 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.Tiles.Attributes;
+using ModLibsCore.Libraries.Debug;
+using ModLibsGeneral.Libraries.Tiles.Attributes;
 
 
 namespace Bullwhip.Items {
@@ -89,7 +89,7 @@ namespace Bullwhip.Items {
 
 			if( isActive ) {
 				isPlatform = Main.tileSolidTop[tile.type] && Main.tileSolid[tile.type];
-				isBreakable = TileAttributeHelpers.IsBreakable( tileX, tileY );
+				isBreakable = TileAttributeLibraries.IsBreakable( tileX, tileY );
 			} else {
 				isPlatform = false;
 				isBreakable = false;
@@ -99,34 +99,34 @@ namespace Bullwhip.Items {
 		}
 
 		private static IEnumerable<(int TileX, int TileY)> FindNearbyBreakableTiles( int tileX, int tileY ) {
-			if( TileAttributeHelpers.IsBreakable(tileX, tileY) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX, tileY) ) {
 				yield return (tileX, tileY);
 			}
 
-			if( TileAttributeHelpers.IsBreakable(tileX - 1, tileY - 1) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX - 1, tileY - 1) ) {
 				yield return (tileX - 1, tileY - 1);
 			}
-			if( TileAttributeHelpers.IsBreakable(tileX, tileY - 1) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX, tileY - 1) ) {
 				yield return (tileX, tileY - 1);
 			}
-			if( TileAttributeHelpers.IsBreakable(tileX + 1, tileY - 1) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX + 1, tileY - 1) ) {
 				yield return (tileX + 1, tileY - 1);
 			}
 
-			if( TileAttributeHelpers.IsBreakable(tileX - 1, tileY) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX - 1, tileY) ) {
 				yield return (tileX - 1, tileY);
 			}
-			if( TileAttributeHelpers.IsBreakable(tileX + 1, tileY) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX + 1, tileY) ) {
 				yield return (tileX + 1, tileY);
 			}
 
-			if( TileAttributeHelpers.IsBreakable(tileX - 1, tileY + 1) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX - 1, tileY + 1) ) {
 				yield return (tileX - 1, tileY + 1);
 			}
-			if( TileAttributeHelpers.IsBreakable(tileX, tileY + 1) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX, tileY + 1) ) {
 				yield return (tileX, tileY + 1);
 			}
-			if( TileAttributeHelpers.IsBreakable(tileX + 1, tileY + 1) ) {
+			if( TileAttributeLibraries.IsBreakable(tileX + 1, tileY + 1) ) {
 				yield return (tileX + 1, tileY + 1);
 			}
 		}

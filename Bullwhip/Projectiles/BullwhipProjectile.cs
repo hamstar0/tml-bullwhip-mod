@@ -4,8 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using HamstarHelpers.Classes.Errors;
-using HamstarHelpers.Helpers.Debug;
+using ModLibsCore.Classes.Errors;
+using ModLibsCore.Libraries.Debug;
 using Bullwhip.Items;
 
 

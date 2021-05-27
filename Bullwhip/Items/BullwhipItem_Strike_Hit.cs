@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.NPCs;
-using HamstarHelpers.Helpers.TModLoader;
+using ModLibsCore.Libraries.Debug;
+using ModLibsCore.Libraries.TModLoader;
+using ModLibsGeneral.Libraries.NPCs;
 
 
 namespace Bullwhip.Items {
@@ -17,7 +17,7 @@ namespace Bullwhip.Items {
 			}
 
 			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
-				NPCHelpers.Kill( npc );
+				NPCLibraries.Kill( npc );
 			} else {
 				var config = BullwhipConfig.Instance;
 				int dmg = config.Get<int>( nameof( config.WhipDamage ) );
@@ -73,7 +73,7 @@ namespace Bullwhip.Items {
 				// Doesn't work on slimes
 				if( npc.aiStyle != 1 ) {
 					float confuseChance = config.Get<float>( nameof( BullwhipConfig.WhipConfuseChance ) );
-					if( TmlHelpers.SafelyGetRand().NextFloat() <= confuseChance ) {
+					if( TmlLibraries.SafelyGetRand().NextFloat() <= confuseChance ) {
 						BullwhipItem.ApplyConfuse( npc );
 					}
 				}
@@ -88,10 +88,10 @@ namespace Bullwhip.Items {
 				return;
 			}
 
-			var rand = TmlHelpers.SafelyGetRand();
+			var rand = TmlLibraries.SafelyGetRand();
 
 			if( rand.NextBool() ) {	// 50% chance
-				//NPCHelpers.Remove( npc );
+				//NPCLibraries.Remove( npc );
 				var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
 				mynpc.FleeAction( false );
 

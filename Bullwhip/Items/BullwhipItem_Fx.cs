@@ -1,8 +1,8 @@
-using HamstarHelpers.Helpers.Debug;
-using Microsoft.Xna.Framework;
 using System;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
+using ModLibsCore.Libraries.Debug;
 
 
 namespace Bullwhip.Items {

@@ -1,11 +1,10 @@
-using HamstarHelpers.Helpers.Debug;
-using HamstarHelpers.Helpers.TModLoader;
-using Microsoft.Xna.Framework;
 using System;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
+using ModLibsCore.Libraries.TModLoader;
 
 
 namespace Bullwhip.Items {
@@ -15,7 +14,7 @@ namespace Bullwhip.Items {
 				return;
 			}
 
-			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
+			UnifiedRandom rand = TmlLibraries.SafelyGetRand();
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 
 			if( rand.Next(4) == 0 ) {
@@ -55,7 +54,7 @@ namespace Bullwhip.Items {
 		////
 
 		public static void ApplyConfuse( NPC npc ) {
-			UnifiedRandom rand = TmlHelpers.SafelyGetRand();
+			UnifiedRandom rand = TmlLibraries.SafelyGetRand();
 			int tickDuration = 60 * rand.Next(4, 9);
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 
