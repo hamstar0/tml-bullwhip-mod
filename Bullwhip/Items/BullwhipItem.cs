@@ -80,8 +80,9 @@ Main.NewText("1 "+player.ownedProjectileCounts[ this.item.shoot ]);
 					ref int type,
 					ref int damage,
 					ref float knockBack ) {
-			bool isAttemptingWhip = Main.mouseLeft && player.itemAnimation <= 3;
-			return !this.IsWhipping || isAttemptingWhip;
+			return Main.mouseLeft || Main.mouseLeftRelease;
+//			bool isAttemptingWhip = Main.mouseLeft && player.itemAnimation <= 3;
+//			return !this.IsWhipping || isAttemptingWhip;
 		}
 
 

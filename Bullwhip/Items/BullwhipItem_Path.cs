@@ -7,6 +7,7 @@ using ModLibsCore.Libraries.Debug;
 using ModLibsCore.Libraries.DotNET.Extensions;
 using ModLibsGeneral.Libraries.Collisions;
 
+
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		/// <summary>
