@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.GameInput;
 using Terraria.ModLoader;
 using ModLibsCore.Libraries.Debug;
 using Bullwhip.Items;
@@ -71,6 +72,17 @@ namespace Bullwhip {
 			//}
 
 			this.PullHeading = pullHeading;
+		}
+
+
+		////////////////
+
+		public override void ProcessTriggers( TriggersSet triggersSet ) {
+			if( BullwhipMod.Instance.QuickWhip.JustPressed ) {
+				if( !Main.gamePaused && !this.player.dead ) {
+					BullwhipItem.QuickWhipIf( this.player, true );
+				}
+			}
 		}
 	}
 }

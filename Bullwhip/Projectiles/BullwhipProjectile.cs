@@ -14,7 +14,7 @@ namespace Bullwhip.Projectiles {
 		public override bool CloneNewInstances => false;
 
 		////////////////
-
+		
 		public bool IsBegun {
 			get => this.projectile.ai[0] != 0f;
 			set => this.projectile.ai[0] = (value ? 1 : 0);
@@ -75,25 +75,20 @@ namespace Bullwhip.Projectiles {
 			ownerPlr.heldProj = this.projectile.whoAmI;
 			//ownerPlr.itemTime = ownerPlr.itemAnimation;
 
-			if( Main.netMode != 2 ) {
+			if( Main.netMode != NetmodeID.Server ) {
 				if( Main.myPlayer == this.projectile.owner ) {
 					this.UpdatePosition();
-					if( Main.netMode != 0 ) {
-						NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, this.projectile.whoAmI );
-					}
 				} else {
 					this.projectile.spriteDirection = (int)this.projectile.ai[1] / 1000;
 					this.projectile.rotation = this.projectile.ai[1] > 0f
 						? this.projectile.ai[1] - 1000f
 						: this.projectile.ai[1] + 1000f;
 				}
-			} else if( Main.netMode == 2 ) {
+			} else if( Main.netMode == NetmodeID.Server ) {
 				this.projectile.spriteDirection = (int)this.projectile.ai[1] / 1000;
 				this.projectile.rotation = this.projectile.ai[1] > 0f
 					? this.projectile.ai[1] - 1000f
 					: this.projectile.ai[1] + 1000f;
-
-				NetMessage.SendData( MessageID.SyncProjectile, -1, this.projectile.owner, null, this.projectile.whoAmI );
 			}
 
 			if( !ownerPlr.frozen ) {
@@ -101,7 +96,10 @@ namespace Bullwhip.Projectiles {
 					this.IsBegun = true;
 					this.projectile.netUpdate = true;
 				}
-				this.StepThroughFrames();
+
+				if( this.StepThroughFrames() ) {
+					this.projectile.netUpdate = true;
+				}
 			}
 
 			if( !this.IsLastFrame ) {
@@ -115,7 +113,7 @@ namespace Bullwhip.Projectiles {
 			Player plr = Main.player[this.projectile.owner];
 
 //LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
-			BullwhipItem.CastWhipStrike( plr, this.projectile.velocity );
+			BullwhipItem.CastWhipStrike( plr, this.projectile.velocity, false );
 		}
 
 
@@ -152,7 +150,7 @@ namespace Bullwhip.Projectiles {
 
 		////////////////
 
-		private void StepThroughFrames() {
+		private bool StepThroughFrames() {
 			var config = BullwhipConfig.Instance;
 			Projectile proj = this.projectile;
 			bool anim = false;
@@ -193,6 +191,8 @@ namespace Bullwhip.Projectiles {
 					BullwhipItem.PlaySound( sndPos );
 				}
 			}
+
+			return anim;
 		}
 
 

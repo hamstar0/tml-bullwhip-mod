@@ -15,11 +15,21 @@ namespace Bullwhip {
 
 		////////////////
 
+		internal ModHotKey QuickWhip = null;
+
+
+
+		////////////////
+
 		public BullwhipMod() {
 			BullwhipMod.Instance = this;
 		}
 
 		////
+
+		public override void Load() {
+			this.QuickWhip = this.RegisterHotKey( "Quick Whip", "Q" );
+		}
 
 		public override void Unload() {
 			BullwhipMod.Instance = null;

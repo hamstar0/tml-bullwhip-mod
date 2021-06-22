@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using ModLibsCore.Libraries.Debug;
 using ModLibsCore.Libraries.DotNET.Extensions;
 using ModLibsGeneral.Libraries.Collisions;
+using Bullwhip.Packets;
 
 
 namespace Bullwhip.Items {
@@ -15,7 +17,8 @@ namespace Bullwhip.Items {
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="direction"></param>
-		public static void CastWhipStrike( Player player, Vector2 direction ) {
+		/// <param name="syncIfClient"></param>
+		public static void CastWhipStrike( Player player, Vector2 direction, bool syncIfClient ) {
 			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MinimumWhipHitDist) );
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			direction.Normalize();
@@ -64,6 +67,10 @@ namespace Bullwhip.Items {
 				hitItemsAt: hitItemsAt,
 				hitPlayersAt: hitPlayersAt
 			);
+
+			if( syncIfClient && Main.netMode == NetmodeID.MultiplayerClient ) {
+				BullwhipStrikePacket.BroadcastFromClient( player, direction );
+			}
 		}
 
 
