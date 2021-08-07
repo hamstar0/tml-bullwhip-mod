@@ -17,7 +17,7 @@ namespace Bullwhip.Items {
 			}
 
 			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
-				NPCLibraries.Kill( npc );
+				NPCLibraries.Kill( npc, false );
 			} else {
 				var config = BullwhipConfig.Instance;
 				int dmg = config.Get<int>( nameof( config.WhipDamage ) );
@@ -33,7 +33,7 @@ namespace Bullwhip.Items {
 
 				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
 				if( tricksterMod != null ) {
-					if( npc.type == tricksterMod.NPCType( "TricksterNPC" ) ) {
+					if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
 						BullwhipItem.StrikeTrickster( npc );
 					}
 				}
@@ -84,7 +84,7 @@ namespace Bullwhip.Items {
 		////
 
 		private static void StrikeTrickster( NPC npc ) {
-			if( Main.netMode != 1 ) {
+			if( Main.netMode == NetmodeID.MultiplayerClient ) {
 				return;
 			}
 
@@ -95,7 +95,7 @@ namespace Bullwhip.Items {
 				var mynpc = (TheTrickster.NPCs.TricksterNPC)npc.modNPC;
 				mynpc.FleeAction( false );
 
-				if( Main.netMode == 2 ) {
+				if( Main.netMode == NetmodeID.Server ) {
 					NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI );
 				}
 			}
