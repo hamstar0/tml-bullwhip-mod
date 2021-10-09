@@ -40,16 +40,6 @@ namespace Bullwhip.Packets {
 
 		////////////////
 
-		public override void ReceiveOnClient() {
-			Player plr = Main.player[ this.PlayerWho ];
-			if( plr?.active != true ) {
-				LogLibraries.Alert( "Invalid whipper player index " + this.PlayerWho );
-				return;
-			}
-
-			BullwhipItem.CastWhipStrike( plr, this.Direction, false );
-		}
-
 		public override void ReceiveOnServer( int fromWho ) {
 			Player plr = Main.player[ this.PlayerWho ];
 			if( plr?.active != true ) {
@@ -60,6 +50,16 @@ namespace Bullwhip.Packets {
 			BullwhipItem.CastWhipStrike( plr, this.Direction, false );
 
 			SimplePacket.SendToClient( this, -1, this.PlayerWho );
+		}
+
+		public override void ReceiveOnClient() {
+			Player plr = Main.player[ this.PlayerWho ];
+			if( plr?.active != true ) {
+				LogLibraries.Alert( "Invalid whipper player index " + this.PlayerWho );
+				return;
+			}
+
+			BullwhipItem.CastWhipStrike( plr, this.Direction, false );
 		}
 	}
 }

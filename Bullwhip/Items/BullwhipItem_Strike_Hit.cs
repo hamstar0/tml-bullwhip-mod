@@ -11,7 +11,7 @@ using ModLibsGeneral.Libraries.NPCs;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
-		public static void StrikeNPC( Player player, Vector2 direction, Vector2 hitWorldPosition, NPC npc ) {
+		public static void StrikeNPC( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ NPC npc ) {
 			if( npc.immortal || npc.dontTakeDamage ) {
 				return;
 			}
@@ -27,7 +27,7 @@ namespace Bullwhip.Items {
 					kb *= 0.65f;
 				}
 
-				BullwhipItem.StrikeNPC_AI( player, hitWorldPosition, npc, ref kb );
+				BullwhipItem.StrikeNPC_AI( player, /*hitWorldPosition,*/ npc, ref kb );
 
 				npc.StrikeNPC( dmg, kb, player.direction );
 
@@ -45,7 +45,7 @@ namespace Bullwhip.Items {
 
 		////
 		
-		private static void StrikeNPC_AI( Player player, Vector2 hitWorldPosition, NPC npc, ref float knockback ) {
+		private static void StrikeNPC_AI( Player player, /*Vector2 hitWorldPosition,*/ NPC npc, ref float knockback ) {
 			var config = BullwhipConfig.Instance;
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 
@@ -54,7 +54,7 @@ namespace Bullwhip.Items {
 				BullwhipItem.ApplySlimeshot( npc );
 				break;
 			case 3:     // fighters
-				if( !mynpc.IsConfuseWhipped && BullwhipItem.IsHeadshot( npc, hitWorldPosition ) ) {
+				if( !mynpc.IsConfuseWhipped /*&& BullwhipItem.IsHeadshot(npc, hitWorldPosition)*/ ) {
 					BullwhipItem.ApplyConfuse( npc );
 				}
 				break;
@@ -104,7 +104,7 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static void StrikeProjectile( Player player, Vector2 direction, Vector2 hitWorldPosition, Projectile proj ) {
+		public static void StrikeProjectile( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Projectile proj ) {
 			BullwhipConfig config = BullwhipConfig.Instance;
 			//int dmg = config.WhipDamage;
 			//float kb = config.WhipKnockback;
@@ -128,14 +128,14 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static void StrikeItem( Player player, Vector2 direction, Vector2 hitWorldPosition, Item item ) {
-			item.position = player.position;
+		public static void StrikeItem( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Item item ) {
+			item.Center = player.MountedCenter;
 		}
 
 
 		////////////////
 
-		public static void StrikePlayer( Player player, Vector2 direction, Vector2 hitWorldPosition, Player targetPlr ) {
+		public static void StrikePlayer( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Player targetPlr ) {
 			if( targetPlr.dead || targetPlr.immune ) {
 				return;
 			}

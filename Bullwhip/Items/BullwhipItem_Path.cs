@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -53,6 +54,11 @@ namespace Bullwhip.Items {
 				hitPlayersAt: ref hitPlayersAt
 			);
 
+			IEnumerable<NPC> hitNpcs = hitNpcsAt.SelectMany( kv=>kv.Value );
+			IEnumerable<Projectile> hitProjs = hitProjsAt.SelectMany( kv=>kv.Value );
+			IEnumerable<Item> hitItems = hitItemsAt.SelectMany( kv=>kv.Value );
+			IEnumerable<Player> hitPlayers = hitPlayersAt.SelectMany( kv=>kv.Value );
+
 			///
 
 			BullwhipItem.ApplyWhipStrike(
@@ -62,14 +68,25 @@ namespace Bullwhip.Items {
 				breakables: breakables,
 				hitTileAt: hitTileAt,
 				hitPlatformAt: hitPlatformAt,
-				hitNpcsAt: hitNpcsAt,
-				hitProjsAt: hitProjsAt,
-				hitItemsAt: hitItemsAt,
-				hitPlayersAt: hitPlayersAt
+				hitNpcs: hitNpcs,
+				hitProjs: hitProjs,
+				hitItems: hitItems,
+				hitPlayers: hitPlayers
 			);
 
 			if( syncIfClient && Main.netMode == NetmodeID.MultiplayerClient ) {
-				BullwhipStrikePacket.BroadcastFromClient( player, direction );
+				BullwhipHitsPacket.BroadcastFromClient(
+					player: player,
+					start: start,
+					direction: direction,
+					hitTileAt: hitTileAt,
+					hitPlatformAt: hitPlatformAt,
+					breakables: breakables,
+					hitNpcs: hitNpcs,
+					hitProjs: hitProjs,
+					hitItems: hitItems,
+					hitPlayers: hitPlayers
+				);
 			}
 		}
 
