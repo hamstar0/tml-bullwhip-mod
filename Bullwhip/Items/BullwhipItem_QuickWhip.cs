@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ModLibsCore.Services.ProjectileOwner;
+using ModLibsCore.Services.Timers;
 using Bullwhip.Projectiles;
 
 
@@ -35,6 +36,15 @@ namespace Bullwhip.Items {
 				return false;
 			}
 
+			//
+
+			if( Timers.GetTimerTickDuration("BullwhipQuickwhipCooldown") >= 1 ) {
+				return false;
+			}
+			Timers.SetTimer( "BullwhipQuickwhipCooldown", 32, false, () => false );
+
+			//
+
 			int projWho = Projectile.NewProjectile(
 				position: player.MountedCenter,
 				velocity: player.velocity,
@@ -43,6 +53,8 @@ namespace Bullwhip.Items {
 				KnockBack: 1f,
 				Owner: player.whoAmI
 			);
+
+			//
 
 			if( projWho >= 0 && Main.projectile[projWho].type == whipProj ) {
 				ProjectileOwner.SetOwnerManually( Main.projectile[projWho], player );
