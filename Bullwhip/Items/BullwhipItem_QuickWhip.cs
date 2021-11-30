@@ -3,6 +3,7 @@ using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using ModLibsCore.Services.ProjectileOwner;
 using Bullwhip.Projectiles;
 
 
@@ -26,7 +27,11 @@ namespace Bullwhip.Items {
 			}
 
 			int whipProj = ModContent.ProjectileType<BullwhipProjectile>();
-			if( Main.projectile.Any( p => p?.active == true && p.type == whipProj && ((BullwhipProjectile)p.modProjectile). ) ) {
+			if( Main.projectile.Any( p =>
+						p?.active == true
+						&& p.type == whipProj
+						&& p.GetOwner() is Player
+						&& p.GetOwner().whoAmI == player.whoAmI ) ) {
 				return false;
 			}
 
@@ -39,8 +44,12 @@ namespace Bullwhip.Items {
 				Owner: player.whoAmI
 			);
 
-			if( sync && Main.netMode != NetmodeID.SinglePlayer ) {
-				NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, projWho );
+			if( projWho >= 0 && Main.projectile[projWho].type == whipProj ) {
+				ProjectileOwner.SetOwnerManually( Main.projectile[projWho], player );
+
+				if( sync && Main.netMode != NetmodeID.SinglePlayer ) {
+					NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, projWho );
+				}
 			}
 
 			return true;

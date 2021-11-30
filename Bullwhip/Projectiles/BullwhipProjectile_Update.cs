@@ -12,12 +12,21 @@ using Bullwhip.Items;
 namespace Bullwhip.Projectiles {
 	public partial class BullwhipProjectile : ModProjectile {
 		public override void AI() {
-			Player ownerPlr = Main.player[this.projectile.owner];
+			Entity owner = this.projectile.GetOwner();
+			Player ownerPlr = owner as Player;
+			if( ownerPlr == null ) {
+				this.projectile.Kill();
+
+				return;
+			}
+
 			ownerPlr.heldProj = this.projectile.whoAmI;
 			//ownerPlr.itemTime = ownerPlr.itemAnimation;
 
+			//
+
 			if( Main.netMode != NetmodeID.Server ) {
-				if( Main.myPlayer == this.projectile.owner ) {
+				if( Main.myPlayer == ownerPlr?.whoAmI ) {
 					this.UpdatePosition();
 				} else {
 					this.projectile.spriteDirection = (int)this.projectile.ai[1] / 1000;
@@ -32,7 +41,7 @@ namespace Bullwhip.Projectiles {
 					: this.projectile.ai[1] + 1000f;
 			}
 
-			if( !ownerPlr.frozen ) {
+			if( !ownerPlr?.frozen ?? false ) {
 				if( !this.IsBegun ) {
 					this.IsBegun = true;
 					this.projectile.netUpdate = true;
@@ -54,7 +63,12 @@ namespace Bullwhip.Projectiles {
 		////////////////
 
 		private void UpdatePosition() {
-			Player ownerPlr = Main.player[ this.projectile.owner ];
+			Entity owner = this.projectile.GetOwner();
+			Player ownerPlr = owner as Player;
+			if( ownerPlr == null ) {
+				return;
+			}
+
 			Vector2 ownerMountedCenter = ownerPlr.RotatedRelativePoint( ownerPlr.MountedCenter, true );
 
 			this.projectile.spriteDirection = ownerPlr.direction;

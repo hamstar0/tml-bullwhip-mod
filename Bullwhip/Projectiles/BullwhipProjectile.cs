@@ -10,6 +10,12 @@ using Bullwhip.Items;
 
 namespace Bullwhip.Projectiles {
 	public partial class BullwhipProjectile : ModProjectile {
+		internal int PlayerOwnerWho = -1;
+
+
+
+		////////////////
+
 		public override bool CloneNewInstances => false;
 
 		////////////////
