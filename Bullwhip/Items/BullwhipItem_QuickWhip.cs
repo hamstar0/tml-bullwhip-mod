@@ -17,18 +17,23 @@ namespace Bullwhip.Items {
 				return false;
 			}
 
-			if( player.itemTime > 0 ) {
+			if( player.itemTime > 0 || player.itemAnimation > 0 ) {
 				return false;
 			}
 
-			if( player.HeldItem?.IsAir == false || player.heldProj != -1 ) {
+			if( player.heldProj != -1 ) {
+				return false;
+			}
+
+			int whipProj = ModContent.ProjectileType<BullwhipProjectile>();
+			if( Main.projectile.Any( p => p?.active == true && p.type == whipProj && ((BullwhipProjectile)p.modProjectile). ) ) {
 				return false;
 			}
 
 			int projWho = Projectile.NewProjectile(
 				position: player.MountedCenter,
 				velocity: player.velocity,
-				Type: ModContent.ProjectileType<BullwhipProjectile>(),
+				Type: whipProj,
 				Damage: 1,
 				KnockBack: 1f,
 				Owner: player.whoAmI
