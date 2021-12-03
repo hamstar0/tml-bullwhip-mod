@@ -12,10 +12,12 @@ namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
 		public static bool QuickWhipIf( Player player, bool sync ) {
 			int whipType = ModContent.ItemType<BullwhipItem>();
-			Item whipItem = player.inventory
-				.FirstOrDefault( i => i?.IsAir == false && i.type == whipType );
+			Item[] plrInv = player.inventory;
+			int? whipIdx = plrInv
+				.Select( (item, idx) => (int?)idx )
+				.FirstOrDefault( idx => plrInv[idx.Value]?.IsAir == false && plrInv[idx.Value].type == whipType );
 
-			if( whipItem == null ) {
+			if( !whipIdx.HasValue ) {
 				return false;
 			}
 
@@ -38,12 +40,7 @@ namespace Bullwhip.Items {
 
 			//
 
-			if( Timers.GetTimerTickDuration("BullwhipQuickwhipCooldown") >= 1 ) {
-				return false;
-			}
-			Timers.SetTimer( "BullwhipQuickwhipCooldown", 32, false, () => false );
-
-			//
+			int oldSelItem = player.selectedItem;
 
 			int projWho = Projectile.NewProjectile(
 				position: player.MountedCenter,
@@ -53,6 +50,23 @@ namespace Bullwhip.Items {
 				KnockBack: 1f,
 				Owner: player.whoAmI
 			);
+
+			player.selectedItem = whipIdx.Value;
+			
+			player.itemAnimation = 32;	//45;
+			player.itemTime = 60;
+
+			//
+
+			Timers.SetTimer( "BullwhipQuickwhipRecover", 5, false, () => {
+				if( player.itemTime > 0 || player.itemAnimation > 0 ) {
+					return true;
+				}
+
+				player.selectedItem = oldSelItem;
+
+				return false;
+			} );
 
 			//
 

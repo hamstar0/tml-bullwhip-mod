@@ -15,6 +15,11 @@ namespace Bullwhip.Items {
 			if( npc.immortal || npc.dontTakeDamage ) {
 				return;
 			}
+			
+			bool _ = false;
+			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, npc, ref _) ) {
+				return;
+			}
 
 			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
 				NPCLibraries.Kill( npc, false );
@@ -34,7 +39,7 @@ namespace Bullwhip.Items {
 				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
 				if( tricksterMod != null ) {
 					if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
-						BullwhipItem.StrikeTrickster( npc );
+						BullwhipItem.StrikeTrickster( player, npc );
 					}
 				}
 			}
@@ -83,11 +88,11 @@ namespace Bullwhip.Items {
 
 		////
 
-		private static void StrikeTrickster( NPC npc ) {
+		private static void StrikeTrickster( Player player, NPC npc ) {
 			if( Main.netMode == NetmodeID.MultiplayerClient ) {
 				return;
 			}
-
+			
 			var rand = TmlLibraries.SafelyGetRand();
 
 			if( rand.NextBool() ) {	// 50% chance
@@ -105,6 +110,11 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public static void StrikeProjectile( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Projectile proj ) {
+			bool _ = false;
+			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, proj, ref _) ) {
+				return;
+			}
+
 			BullwhipConfig config = BullwhipConfig.Instance;
 			//int dmg = config.WhipDamage;
 			//float kb = config.WhipKnockback;
@@ -129,6 +139,11 @@ namespace Bullwhip.Items {
 		////////////////
 
 		public static void StrikeItem( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Item item ) {
+			bool _ = false;
+			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, item, ref _) ) {
+				return;
+			}
+
 			item.Center = player.MountedCenter;
 		}
 
@@ -137,6 +152,11 @@ namespace Bullwhip.Items {
 
 		public static void StrikePlayer( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Player targetPlr ) {
 			if( targetPlr.dead || targetPlr.immune ) {
+				return;
+			}
+
+			bool _ = false;
+			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, targetPlr, ref _) ) {
 				return;
 			}
 
