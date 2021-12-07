@@ -82,6 +82,14 @@ namespace Bullwhip {
 		public float WhipConfuseChance { get; set; } = 1f / 2.5f;
 
 
+		////
+
+		[Range( 0f, 1f )]
+		[DefaultValue( 0.1f )]
+		[CustomModConfigItem( typeof( MyFloatInputElement ) )]
+		public float WhippedBarrierEctoplasmPercentChance { get; set; } = 0.1f;
+
+
 
 		////////////////
 

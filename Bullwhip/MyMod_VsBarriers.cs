@@ -1,8 +1,9 @@
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Bullwhip.Projectiles;
-using ModLibsCore.Services.ProjectileOwner;
+
 
 namespace Bullwhip {
 	public partial class BullwhipMod : Mod {
@@ -76,6 +77,24 @@ namespace Bullwhip {
 				damage: mybarrier.Strength + 1,
 				syncIfServer: true
 			);
+
+			//
+
+			if( Main.netMode != NetmodeID.MultiplayerClient ) {
+				Mod necMod = ModLoader.GetMod( "Necrotis" );
+
+				if( necMod != null ) {
+					var config = BullwhipConfig.Instance;
+					float ectoPerc = config.Get<float>( nameof(config.WhippedBarrierEctoplasmPercentChance) );
+
+					if( Main.rand.NextFloat() < ectoPerc ) {
+						Item.NewItem(
+							position: barrierPos,
+							Type: necMod.ItemType("DillutedEctoplasmItem")
+						);
+					}
+				}
+			}
 		}
 	}
 }
