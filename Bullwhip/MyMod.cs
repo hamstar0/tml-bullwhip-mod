@@ -1,15 +1,17 @@
+using Terraria;
 using Terraria.ModLoader;
-
+using Bullwhip.Projectiles;
+using Microsoft.Xna.Framework;
 
 namespace Bullwhip {
-	public class BullwhipMod : Mod {
+	public partial class BullwhipMod : Mod {
 		public static string GithubUserName => "hamstar0";
 		public static string GithubProjectName => "tml-bullwhip-mod";
 
 
 		////////////////
 
-		public static BullwhipMod Instance { get; private set; }
+		public static BullwhipMod Instance => ModContent.GetInstance<BullwhipMod>();
 
 
 
@@ -21,18 +23,16 @@ namespace Bullwhip {
 
 		////////////////
 
-		public BullwhipMod() {
-			BullwhipMod.Instance = this;
-		}
-
-		////
-
 		public override void Load() {
 			this.QuickWhip = this.RegisterHotKey( "Quick Whip", "Q" );
 		}
 
-		public override void Unload() {
-			BullwhipMod.Instance = null;
+		////
+
+		public override void PostSetupContent() {
+			if( ModLoader.GetMod("SoulBarriers") != null ) {
+				BullwhipMod.Load_WeakRef_SoulBarriers();
+			}
 		}
 	}
 }
