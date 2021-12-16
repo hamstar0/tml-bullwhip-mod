@@ -71,7 +71,7 @@ namespace Bullwhip.Items {
 			//
 
 			if( projWho >= 0 && Main.projectile[projWho].type == whipProj ) {
-				ProjectileOwner.SetOwnerManually( Main.projectile[projWho], player );
+				ProjectileOwner.SetOwnerManually( projWho, player );
 
 				if( sync && Main.netMode != NetmodeID.SinglePlayer ) {
 					NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, projWho );
