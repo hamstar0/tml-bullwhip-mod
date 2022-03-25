@@ -18,7 +18,7 @@ namespace Bullwhip {
 
 				//
 
-				bool OnPreBarrierEntityCollision( ref Entity intruder ) {
+				bool onPreBarrierEntityCollision( ref Entity intruder, ref double damage ) {
 					if( BullwhipMod.CanEntityCollideWithBarrier(barrier, intruder) ) {
 						BullwhipMod.OnPreBarrierEntityCollision_WeakRef_SoulBarriers( barrier, ref intruder );
 
@@ -30,7 +30,7 @@ namespace Bullwhip {
 
 				//
 
-				barrier.AddPreBarrierEntityCollisionHook( OnPreBarrierEntityCollision );
+				barrier.AddPreBarrierEntityCollisionHook( onPreBarrierEntityCollision );
 			} );
 		}
 
@@ -71,11 +71,13 @@ namespace Bullwhip {
 			Vector2 barrierPos = mybarrier.GetBarrierWorldCenter();
 			Vector2 midOffset = (barrierPos - intruderProj.Center) * 0.5f;
 			Vector2 midPos = intruderProj.Center + midOffset;
+			double dmg = mybarrier.Strength + 1;
 
 			mybarrier?.ApplyRawHit(
 				hitAt: midPos,
-				damage: mybarrier.Strength + 1,
-				syncIfServer: true
+				damage: dmg,
+				syncIfServer: true,
+				context: new SoulBarriers.Barriers.BarrierHitContext( intruderProj, dmg )
 			);
 
 			//
