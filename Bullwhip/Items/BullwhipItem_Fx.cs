@@ -10,7 +10,10 @@ namespace Bullwhip.Items {
 		public static void PlaySound( Vector2 pos ) {
 			var bi = ModContent.GetInstance<BullwhipItem>();
 
-			int soundSlot = BullwhipMod.Instance.GetSoundSlot( SoundType.Custom, "Sounds/Custom/BullwhipCrackSound" );
+			int soundSlot = BullwhipMod.Instance.GetSoundSlot(
+				SoundType.Custom,
+				"Sounds/Custom/BullwhipCrackSound"
+			);
 			bi.SoundInstance = Main.PlaySound( (int)SoundType.Custom, (int)pos.X, (int)pos.Y, soundSlot, 0.5f );
 		}
 

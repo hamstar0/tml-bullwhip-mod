@@ -1,7 +1,7 @@
 displayName = Bullwhip
 author = hamstar
-version = 1.5.0.1
+version = 1.5.0.2
 modReferences = ModLibsCore@1.3.0, ModLibsGeneral@1.2.0
-weakReferences = SoulBarriers@3.0.0, TheTrickster@1.7.1
+weakReferences = SoulBarriers@3.0.1, TheTrickster@1.7.1
 buildIgnore = *.csproj, *.user, *.bat, obj\*, bin\*, .vs\*, .git\*
 homepage = https://github.com/hamstar0/tml-bullwhip-mod
