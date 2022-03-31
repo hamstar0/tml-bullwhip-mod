@@ -25,7 +25,20 @@ namespace Bullwhip.Projectiles {
 			set => this.projectile.ai[0] = (value ? 1 : 0);
 		}
 
-		public bool IsLastFrame => this.projectile.frame >= (Main.projFrames[this.projectile.type] - 1);
+		public bool IsLastFrame {
+			get {
+				int lastFrame = Main.projFrames[this.projectile.type] - 1;
+				return this.projectile.frame >= lastFrame;
+			}
+		}
+
+		////
+
+		public int LastKnownSpriteDirection => (int)this.projectile.ai[1] / 1000;
+
+		public float LastKnownRotation => this.projectile.ai[1] > 0f
+			? this.projectile.ai[1] - 1000f
+			: this.projectile.ai[1] + 1000f;
 
 
 

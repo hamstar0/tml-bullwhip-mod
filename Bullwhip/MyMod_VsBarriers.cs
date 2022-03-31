@@ -64,7 +64,9 @@ namespace Bullwhip {
 		}
 
 
-		private static void OnPreBarrierEntityCollision_WeakRef_SoulBarriers( object rawBarrier, ref Entity intruder ) {
+		private static void OnPreBarrierEntityCollision_WeakRef_SoulBarriers(
+					object rawBarrier,
+					ref Entity intruder ) {
 			Projectile intruderProj = intruder as Projectile;
 			var mybarrier = (SoulBarriers.Barriers.BarrierTypes.Barrier)rawBarrier;
 

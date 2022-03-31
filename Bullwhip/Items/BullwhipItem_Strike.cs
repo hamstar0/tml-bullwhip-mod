@@ -37,6 +37,7 @@ namespace Bullwhip.Items {
 	return true;
 } );*/
 					WorldGen.KillTile( tileX, tileY );
+
 					if( Main.netMode != 0 ) {
 						NetMessage.SendData( MessageID.TileChange, -1, -1, null, 0, (float)tileX, (float)tileY, 0f, 0, 0, 0 );
 					}
@@ -78,11 +79,17 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
 			foreach( NPC npc in hitNpcs ) {
-				isNpcHit = true;
-				if( checkedNpcs.Contains(npc) ) { continue; }
+				if( checkedNpcs.Contains(npc) ) {
+					continue;
+				}
+
 				checkedNpcs.Add( npc );
 
+				//
+
 				BullwhipItem.StrikeNPC( player, direction, /*target,*/ npc );
+
+				isNpcHit = true;
 			}
 
 			return isNpcHit;
@@ -98,13 +105,19 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
 			foreach( Projectile proj in hitProjs ) {
-				isProjHit = true;
-				if( checkedProjs.Contains(proj) ) { continue; }
+				if( checkedProjs.Contains(proj) ) {
+					continue;
+				}
+
 				checkedProjs.Add( proj );
 
-				BullwhipItem.StrikeProjectile( player, direction, /*target,*/ proj );
+				//
+
+				BullwhipItem.StrikeProjectile_If( player, direction, /*target,*/ proj );
 				proj.friendly = true;
 				proj.hostile = false;
+
+				isProjHit = true;
 			}
 
 			return isProjHit;
@@ -120,11 +133,17 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<Item> items) in hitItemsAt ) {
 			foreach( Item item in hitItems ) {
-				isItemHit = true;
-				if( checkedItems.Contains(item) ) { continue; }
+				if( checkedItems.Contains(item) ) {
+					continue;
+				}
+
 				checkedItems.Add( item );
 
-				BullwhipItem.StrikeItem( player, direction, /*target,*/ item );
+				//
+
+				BullwhipItem.StrikeItem_If( player, direction, /*target,*/ item );
+
+				isItemHit = true;
 			}
 
 			return isItemHit;
@@ -140,11 +159,17 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<Player> plrs) in hitPlayersAt ) {
 			foreach( Player plr in hitPlayers ) {
-				isPlayerHit = true;
-				if( checkedPlayers.Contains( plr ) ) { continue; }
+				if( checkedPlayers.Contains(plr) ) {
+					continue;
+				}
+
 				checkedPlayers.Add( plr );
 
-				BullwhipItem.StrikePlayer( player, direction, /*target,*/ plr );
+				//
+
+				BullwhipItem.StrikePlayer_If( player, direction, /*target,*/ plr );
+
+				isPlayerHit = true;
 			}
 
 			return isPlayerHit;

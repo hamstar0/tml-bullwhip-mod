@@ -82,6 +82,10 @@ namespace Bullwhip {
 		public float WhipConfuseChance { get; set; } = 1f / 2.5f;
 
 
+		[DefaultValue( true )]
+		public bool WhipIgnoresPvP { get; set; } = true;
+
+
 		////
 
 		[Range( 0f, 1f )]

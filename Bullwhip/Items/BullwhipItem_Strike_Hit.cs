@@ -17,7 +17,7 @@ namespace Bullwhip.Items {
 			}
 			
 			bool _ = false;
-			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, npc, ref _) ) {
+			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, npc, ref _) ) {
 				return;
 			}
 
@@ -39,7 +39,7 @@ namespace Bullwhip.Items {
 				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
 				if( tricksterMod != null ) {
 					if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
-						BullwhipItem.StrikeTrickster( player, npc );
+						BullwhipItem.StrikeTrickster_If( player, npc );
 					}
 				}
 			}
@@ -88,10 +88,12 @@ namespace Bullwhip.Items {
 
 		////
 
-		private static void StrikeTrickster( Player player, NPC npc ) {
+		private static void StrikeTrickster_If( Player player, NPC npc ) {
 			if( Main.netMode == NetmodeID.MultiplayerClient ) {
 				return;
 			}
+
+			//
 			
 			var rand = TmlLibraries.SafelyGetRand();
 
@@ -109,13 +111,19 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static void StrikeProjectile( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Projectile proj ) {
+		public static void StrikeProjectile_If(
+					Player player,
+					Vector2 direction,
+					/*Vector2 hitWorldPosition,*/
+					Projectile proj ) {
 			bool _ = false;
-			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, proj, ref _) ) {
+			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, proj, ref _) ) {
 				return;
 			}
 
-			BullwhipConfig config = BullwhipConfig.Instance;
+			//
+
+			//BullwhipConfig config = BullwhipConfig.Instance;
 			//int dmg = config.WhipDamage;
 			//float kb = config.WhipKnockback;
 
@@ -124,6 +132,8 @@ namespace Bullwhip.Items {
 				return;
 			}
 
+			//
+
 			float speed = proj.velocity.Length();
 			direction.Normalize();
 			proj.velocity.Normalize();
@@ -131,6 +141,8 @@ namespace Bullwhip.Items {
 			proj.velocity = Vector2.Normalize( direction + proj.velocity );
 			proj.velocity *= speed;
 
+			//
+
 			BullwhipItem.CreateHitEntityFx( proj.Center );
 			BullwhipItem.CreateHitEntityFx( proj.Center );
 		}
@@ -138,11 +150,17 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static void StrikeItem( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Item item ) {
+		public static void StrikeItem_If(
+					Player player,
+					Vector2 direction,
+					/*Vector2 hitWorldPosition,*/
+					Item item ) {
 			bool _ = false;
-			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, item, ref _) ) {
+			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, item, ref _) ) {
 				return;
 			}
+
+			//
 
 			item.Center = player.MountedCenter;
 		}
@@ -150,22 +168,42 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static void StrikePlayer( Player player, Vector2 direction, /*Vector2 hitWorldPosition,*/ Player targetPlr ) {
+		public static void StrikePlayer_If(
+					Player player,
+					Vector2 direction,
+					/*Vector2 hitWorldPosition,*/
+					Player targetPlr ) {
 			if( targetPlr.dead || targetPlr.immune ) {
 				return;
 			}
 
+			//
+
 			bool _ = false;
-			if( !BullwhipAPI.ApplyBullwhipEntityHit(player, targetPlr, ref _) ) {
+			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, targetPlr, ref _) ) {
 				return;
 			}
 
-			BullwhipConfig config = BullwhipConfig.Instance;
+			//
+
+			var config = BullwhipConfig.Instance;
+
+			bool canPvp = player.hostile && targetPlr.hostile
+				&& (targetPlr.team != player.team || player.team == 0);
+
+			if( !canPvp && !config.Get<bool>( nameof(config.WhipIgnoresPvP) ) ) {
+				return;
+			}
+
+			//
+
 			int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
 			float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
 
 			targetPlr.velocity += direction * kb;
 			targetPlr.Hurt( PlayerDeathReason.ByPlayer(player.whoAmI), dmg, player.direction );
+
+			//
 
 			BullwhipItem.CreateHitEntityFx( targetPlr.Center );
 		}

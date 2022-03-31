@@ -20,19 +20,19 @@ namespace Bullwhip {
 		////////////////
 
 		public static void AddBullwhipEntityHitHook( OnPreBullwhipHitEntity hook ) {
-			ModContent.GetInstance<BullwhipAPI>().HitHooks.Add( hook );
+			ModContent.GetInstance<BullwhipAPI>().PreHitHooks.Add( hook );
 		}
 
 
 		////////////////
 
-		internal static bool ApplyBullwhipEntityHit(
+		internal static bool OnPreBullwhipEntityHit(
 					Player whipOwner,
 					/*Item whipItem,
 					Projectile whipProjectile,*/
 					Entity target,
 					ref bool isDebuffImmune ) {
-			foreach( OnPreBullwhipHitEntity hook in ModContent.GetInstance<BullwhipAPI>().HitHooks ) {
+			foreach( OnPreBullwhipHitEntity hook in ModContent.GetInstance<BullwhipAPI>().PreHitHooks ) {
 				if( !hook.Invoke(whipOwner, /*whipItem, whipProjectile,*/ target, ref isDebuffImmune) ) {
 					return false;
 				}
@@ -44,7 +44,7 @@ namespace Bullwhip {
 
 		////////////////
 
-		private IList<OnPreBullwhipHitEntity> HitHooks = new List<OnPreBullwhipHitEntity>();
+		private IList<OnPreBullwhipHitEntity> PreHitHooks = new List<OnPreBullwhipHitEntity>();
 
 
 
