@@ -63,12 +63,14 @@ namespace Bullwhip.Items {
 
 			var config = BullwhipConfig.Instance;
 
-			bool canPvp = player.hostile && targetPlr.hostile
-				&& (targetPlr.team != player.team || player.team == 0);
+			bool ignorePvp = config.Get<bool>( nameof(config.WhipIgnoresPvP) );
+			bool onlyHitsIfPvp = !ignorePvp;
 
-			if( !canPvp && !config.Get<bool>( nameof(config.WhipIgnoresPvP) ) ) {
-				return;
-			}
+			//bool canPvp = player.hostile && targetPlr.hostile
+			//	&& (targetPlr.team != player.team || player.team == 0);
+			//if( !canPvp && !config.Get<bool>( nameof(config.WhipIgnoresPvP) ) ) {
+			//	return;
+			//}
 
 			//
 
@@ -80,7 +82,7 @@ namespace Bullwhip.Items {
 					damageSource: PlayerDeathReason.ByPlayer(player.whoAmI),
 					Damage: dmg,
 					hitDirection: player.direction,
-					pvp: false,	// LUL
+					pvp: onlyHitsIfPvp,	// LUL
 					quiet: Main.netMode != NetmodeID.Server
 				);
 
