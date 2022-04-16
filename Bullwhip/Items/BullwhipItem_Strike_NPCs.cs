@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ModLibsCore.Libraries.Debug;
@@ -11,6 +11,36 @@ using ModLibsGeneral.Libraries.NPCs;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
+		private static bool ApplyWhipStrikeOnNPCs(
+					Player player,
+					Vector2 direction,
+					IEnumerable<NPC> hitNpcs,
+					bool fxOnly ) {
+			//IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt ) {
+			bool isNpcHit = false;
+			var checkedNpcs = new HashSet<NPC>();
+
+			//foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
+			foreach( NPC npc in hitNpcs ) {
+				if( checkedNpcs.Contains( npc ) ) {
+					continue;
+				}
+
+				checkedNpcs.Add( npc );
+
+				//
+
+				BullwhipItem.StrikeNPC_If( player, direction, /*target,*/ npc, fxOnly );
+
+				isNpcHit = true;
+			}
+
+			return isNpcHit;
+		}
+
+
+		////////////////
+
 		public static void StrikeNPC_If(
 					Player player,
 					Vector2 direction,
@@ -123,132 +153,6 @@ namespace Bullwhip.Items {
 					NetMessage.SendData( MessageID.SyncNPC, -1, -1, null, npc.whoAmI );
 				}
 			}
-		}
-
-
-		////////////////
-
-		public static bool StrikeProjectile_If(
-					Player player,
-					Vector2 direction,
-					/*Vector2 hitWorldPosition,*/
-					Projectile proj,
-					bool fxOnly ) {
-			bool _ = false;
-			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, proj, fxOnly, ref _) ) {
-				return false;
-			}
-
-			//
-
-			//BullwhipConfig config = BullwhipConfig.Instance;
-			//int dmg = config.WhipDamage;
-			//float kb = config.WhipKnockback;
-
-			// Ignore beehives
-			if( proj.type == ProjectileID.BeeHive ) {
-				return false;
-			}
-
-			//
-
-			if( !fxOnly ) {
-				float speed = proj.velocity.Length();
-				direction.Normalize();
-				proj.velocity.Normalize();
-
-				proj.velocity = Vector2.Normalize( direction + proj.velocity );
-				proj.velocity *= speed;
-			}
-
-			//
-			
-			BullwhipItem.CreateHitEntityFx( proj.Center );
-			BullwhipItem.CreateHitEntityFx( proj.Center );
-
-			//
-
-			return true;
-		}
-
-
-		////////////////
-
-		public static void StrikeItem_If(
-					Player player,
-					Vector2 direction,
-					/*Vector2 hitWorldPosition,*/
-					Item item,
-					bool fxOnly ) {
-			bool _ = false;
-			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, item, fxOnly, ref _ ) ) {
-				return;
-			}
-
-			//
-
-			if( !fxOnly ) {
-				item.Center = player.MountedCenter;
-			}
-		}
-
-
-		////////////////
-
-		public static void StrikePlayer_If(
-					Player player,
-					Vector2 direction,
-					/*Vector2 hitWorldPosition,*/
-					Player targetPlr,
-					bool fxOnly ) {
-			if( targetPlr.dead || targetPlr.immune ) {
-				return;
-			}
-
-			//
-
-			bool _ = false;
-			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, targetPlr, fxOnly, ref _) ) {
-				return;
-			}
-
-			//
-
-			var config = BullwhipConfig.Instance;
-
-			bool canPvp = player.hostile && targetPlr.hostile
-				&& (targetPlr.team != player.team || player.team == 0);
-
-			if( !canPvp && !config.Get<bool>( nameof(config.WhipIgnoresPvP) ) ) {
-				return;
-			}
-
-			//
-
-			if( !fxOnly ) {
-				int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
-				float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
-
-				targetPlr.Hurt(
-					damageSource: PlayerDeathReason.ByPlayer(player.whoAmI),
-					Damage: dmg,
-					hitDirection: player.direction,
-					pvp: false,	// LUL
-					quiet: Main.netMode != NetmodeID.Server
-				);
-
-				targetPlr.velocity += direction * kb;
-
-				//
-
-				if( Main.netMode == NetmodeID.Server ) {
-					NetMessage.SendData( MessageID.SyncPlayer, -1, -1, null, targetPlr.whoAmI );
-				}
-			}
-
-			//
-
-			BullwhipItem.CreateHitEntityFx( targetPlr.Center );
 		}
 	}
 }

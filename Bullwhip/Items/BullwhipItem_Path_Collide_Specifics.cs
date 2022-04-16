@@ -10,7 +10,7 @@ using ModLibsGeneral.Libraries.Tiles.Attributes;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
-		private static IEnumerable<NPC> FindWhipNpcCollisionAt( Vector2 wldPos ) {
+		private static IEnumerable<NPC> FindStrikeNpcCollisionAt( Vector2 wldPos ) {
 			//float npcRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
 
 			return Main.npc.Where( anyNpc => {
@@ -30,7 +30,7 @@ namespace Bullwhip.Items {
 		}
 		
 
-		private static IEnumerable<Projectile> FindWhipProjectileCollisionAt( Vector2 wldPos ) {
+		private static IEnumerable<Projectile> FindStrikeProjectileCollisionAt( Vector2 wldPos ) {
 			//int projRadiusSqr = BullwhipConfig.Instance.WhipProjectileHitRadius;
 			//projRadiusSqr *= projRadiusSqr;
 
@@ -47,7 +47,7 @@ namespace Bullwhip.Items {
 		}
 		
 
-		private static IEnumerable<Item> FindWhipItemCollisionAt( Vector2 wldPos ) {
+		private static IEnumerable<Item> FindStrikeItemCollisionAt( Vector2 wldPos ) {
 			//int itemRadiusSqr = BullwhipConfig.Instance.WhipItemHitRadius;
 			//itemRadiusSqr *= itemRadiusSqr;
 
@@ -64,7 +64,7 @@ namespace Bullwhip.Items {
 		}
 
 
-		private static IEnumerable<Player> FindWhipPlayerCollisionAt( Player whipOwner, Vector2 wldPos ) {
+		private static IEnumerable<Player> FindStrikePlayerCollisionAt( Player whipOwner, Vector2 wldPos ) {
 			//int plrRadiusSqr = BullwhipConfig.Instance.WhipNPCHitRadius;
 			//plrRadiusSqr *= plrRadiusSqr;
 
@@ -83,7 +83,7 @@ namespace Bullwhip.Items {
 
 		////
 
-		private static bool FindWhipTileCollisionAt( int tileX, int tileY, out bool isPlatform, out bool isBreakable ) {
+		private static bool FindStrikeTileCollisionAt( int tileX, int tileY, out bool isPlatform, out bool isBreakable ) {
 			Tile tile = Framing.GetTileSafely( tileX, tileY );
 			bool isActive = tile.active() && !tile.inActive();
 

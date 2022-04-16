@@ -69,18 +69,18 @@ namespace Bullwhip.Items {
 			}
 
 			if( hitNpcsAt != null ) {
-				hitNpcsAt[wldPos] = BullwhipItem.FindWhipNpcCollisionAt( wldPos );
+				hitNpcsAt[wldPos] = BullwhipItem.FindStrikeNpcCollisionAt( wldPos );
 				hitNpc = hitNpcsAt[wldPos].ToArray().Length >= maxHits;
 			}
 			if( hitProjsAt != null ) {
-				hitProjsAt[wldPos] = BullwhipItem.FindWhipProjectileCollisionAt( wldPos );
+				hitProjsAt[wldPos] = BullwhipItem.FindStrikeProjectileCollisionAt( wldPos );
 				hitProj = hitProjsAt[wldPos].ToArray().Length >= maxHits;
 			}
 			if( hitItemsAt != null ) {
-				hitItemsAt[wldPos] = BullwhipItem.FindWhipItemCollisionAt( wldPos );
+				hitItemsAt[wldPos] = BullwhipItem.FindStrikeItemCollisionAt( wldPos );
 			}
 			if( hitPlayersAt != null ) {
-				hitPlayersAt[wldPos] = BullwhipItem.FindWhipPlayerCollisionAt( whipOwner, wldPos );
+				hitPlayersAt[wldPos] = BullwhipItem.FindStrikePlayerCollisionAt( whipOwner, wldPos );
 			}
 		}
 	}

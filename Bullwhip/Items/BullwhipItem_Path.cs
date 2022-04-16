@@ -19,7 +19,7 @@ namespace Bullwhip.Items {
 		/// <param name="player"></param>
 		/// <param name="direction"></param>
 		/// <param name="syncIfClient"></param>
-		public static void CastWhipStrike( Player player, Vector2 direction, bool syncIfClient ) {
+		public static void CastStrike( Player player, Vector2 direction, bool syncIfClient ) {
 			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MinimumWhipHitDist) );
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			direction.Normalize();
@@ -43,7 +43,7 @@ namespace Bullwhip.Items {
 
 			//
 
-			bool hitAnything = BullwhipItem.CastWhipScanRay(
+			bool hitAnything = BullwhipItem.CastStrikeScanRay(
 				whipOwner: player,
 				start: start,
 				direction: direction,
@@ -65,7 +65,7 @@ namespace Bullwhip.Items {
 
 			//
 			
-			BullwhipItem.ApplyWhipStrike(
+			BullwhipItem.ApplyStrike(
 				whipOwner: player,
 				start: start,
 				direction: direction,
@@ -117,7 +117,7 @@ namespace Bullwhip.Items {
 		/// <param name="hitItemsAt"></param>
 		/// <param name="hitPlayersAt"></param>
 		/// <returns>`true` if something gets hit.</returns>
-		public static bool CastWhipScanRay(
+		public static bool CastStrikeScanRay(
 					Player whipOwner,
 					Vector2 start,
 					Vector2 direction,
@@ -186,7 +186,7 @@ namespace Bullwhip.Items {
 				}
 
 				bool isTile, isPlatform, isBreakable;
-				isTile = BullwhipItem.FindWhipTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
+				isTile = BullwhipItem.FindStrikeTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
 				IEnumerable<(int TileX, int TileY)> myBreakables = BullwhipItem.FindNearbyBreakableTiles( tileX, tileY );
 
 				// Account for adjacent breakable tiles

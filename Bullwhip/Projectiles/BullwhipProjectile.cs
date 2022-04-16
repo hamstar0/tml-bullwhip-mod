@@ -104,7 +104,7 @@ namespace Bullwhip.Projectiles {
 			//
 
 			//LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
-			BullwhipItem.CastWhipStrike( plr, this.projectile.velocity, false );
+			BullwhipItem.CastStrike( plr, this.projectile.velocity, false );
 		}
 	}
 }

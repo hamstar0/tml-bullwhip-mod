@@ -146,7 +146,7 @@ namespace Bullwhip.Packets {
 
 				//
 
-				BullwhipItem.ApplyWhipStrike(
+				BullwhipItem.ApplyStrike(
 					whipOwner: Main.player[this.PlayerWho],
 					start: new Vector2( this.StartX, this.StartY ),
 					direction: new Vector2( this.DirectionX, this.DirectionY ),

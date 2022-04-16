@@ -10,7 +10,7 @@ using ModLibsCore.Libraries.DotNET.Extensions;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
-		public static void ApplyWhipStrike(
+		public static void ApplyStrike(
 					Player whipOwner,
 					Vector2 start,
 					Vector2 direction,
@@ -52,10 +52,10 @@ namespace Bullwhip.Items {
 
 			//
 
-			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPC( whipOwner, direction, hitNpcs, fxOnly );
-			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectile( whipOwner, direction, hitProjs, fxOnly );
-			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItem( whipOwner, direction, hitItems, fxOnly );
-			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayer( whipOwner, direction, hitPlayers, fxOnly );
+			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPCs( whipOwner, direction, hitNpcs, fxOnly );
+			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectiles( whipOwner, direction, hitProjs, fxOnly );
+			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItems( whipOwner, direction, hitItems, fxOnly );
+			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayers( whipOwner, direction, hitPlayers, fxOnly );
 
 			//
 
@@ -76,126 +76,6 @@ namespace Bullwhip.Items {
 					BullwhipItem.CreateHitSolidFx( hitTileAt.Value.ToVector2() * 16f );
 				}
 			}
-		}
-
-
-		////////////////
-
-		private static bool ApplyWhipStrikeOnNPC(
-					Player player,
-					Vector2 direction,
-					IEnumerable<NPC> hitNpcs,
-					bool fxOnly ) {
-					//IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt ) {
-			bool isNpcHit = false;
-			var checkedNpcs = new HashSet<NPC>();
-
-			//foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
-			foreach( NPC npc in hitNpcs ) {
-				if( checkedNpcs.Contains(npc) ) {
-					continue;
-				}
-
-				checkedNpcs.Add( npc );
-
-				//
-
-				BullwhipItem.StrikeNPC_If( player, direction, /*target,*/ npc, fxOnly );
-
-				isNpcHit = true;
-			}
-
-			return isNpcHit;
-		}
-
-		private static bool ApplyWhipStrikeOnProjectile(
-					Player player,
-					Vector2 direction,
-					IEnumerable<Projectile> hitProjs,
-					bool fxOnly ) {
-					//IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
-			var checkedProjs = new HashSet<Projectile>();
-			bool isProjHit = false;
-
-			//foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
-			foreach( Projectile proj in hitProjs ) {
-				if( checkedProjs.Contains(proj) ) {
-					continue;
-				}
-
-				checkedProjs.Add( proj );
-
-				//
-				
-				if( BullwhipItem.StrikeProjectile_If(player, direction, /*target,*/ proj, fxOnly) ) {
-					proj.friendly = true;
-					proj.hostile = false;
-				}
-
-				//
-
-				isProjHit = true;
-			}
-
-			return isProjHit;
-		}
-
-		private static bool ApplyWhipStrikeOnItem(
-					Player player,
-					Vector2 direction,
-					IEnumerable<Item> hitItems,
-					bool fxOnly ) {
-					//IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
-			var checkedItems = new HashSet<Item>();
-			bool isItemHit = false;
-
-			//foreach( (Vector2 target, IEnumerable<Item> items) in hitItemsAt ) {
-			foreach( Item item in hitItems ) {
-				if( checkedItems.Contains(item) ) {
-					continue;
-				}
-
-				checkedItems.Add( item );
-
-				//
-
-				BullwhipItem.StrikeItem_If( player, direction, /*target,*/ item, fxOnly );
-
-				//
-
-				isItemHit = true;
-			}
-
-			return isItemHit;
-		}
-
-		private static bool ApplyWhipStrikeOnPlayer(
-					Player player,
-					Vector2 direction,
-					IEnumerable<Player> hitPlayers,
-					bool fxOnly ) {
-					//IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
-			var checkedPlayers = new HashSet<Player>();
-			bool isPlayerHit = false;
-
-			//foreach( (Vector2 target, IEnumerable<Player> plrs) in hitPlayersAt ) {
-			foreach( Player plr in hitPlayers ) {
-				if( checkedPlayers.Contains(plr) ) {
-					continue;
-				}
-
-				checkedPlayers.Add( plr );
-
-				//
-
-				BullwhipItem.StrikePlayer_If( player, direction, /*target,*/ plr, fxOnly );
-
-				//
-
-				isPlayerHit = true;
-			}
-
-			return isPlayerHit;
 		}
 	}
 }
