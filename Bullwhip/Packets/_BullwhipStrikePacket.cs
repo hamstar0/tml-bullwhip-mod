@@ -1,4 +1,4 @@
-﻿using System;
+﻿/*using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -62,4 +62,4 @@ namespace Bullwhip.Packets {
 			BullwhipItem.CastWhipStrike( plr, this.Direction, false );
 		}
 	}
-}
+}*/

@@ -5,6 +5,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using ModLibsCore.Classes.Errors;
 using ModLibsCore.Libraries.Debug;
+using ModLibsCore.Services.ProjectileOwner;
 using Bullwhip.Items;
 
 
@@ -86,9 +87,23 @@ namespace Bullwhip.Projectiles {
 		}
 
 		public override void Kill( int timeLeft ) {
-			Player plr = Main.player[this.projectile.owner];
+			if( Main.netMode == NetmodeID.Server ) {
+				return;
+			}
 
-//LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
+			//
+
+			Player plr = this.projectile.GetPlayerOwner();
+			if( plr?.active != true ) {
+				return;
+			}
+			if( Main.myPlayer != plr.whoAmI ) {
+				return;	// <- Local sourced only
+			}
+
+			//
+
+			//LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
 			BullwhipItem.CastWhipStrike( plr, this.projectile.velocity, false );
 		}
 	}

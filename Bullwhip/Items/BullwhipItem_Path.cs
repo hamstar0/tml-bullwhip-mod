@@ -24,10 +24,14 @@ namespace Bullwhip.Items {
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			direction.Normalize();
 
+			//
+
 			Vector2 start = player.RotatedRelativePoint( player.MountedCenter, true );
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 				Dust.QuickDust( start, Color.Lime );
 			}
+
+			//
 
 			(int TileX, int TileY)? hitTileAt;
 			(int TileX, int TileY)? hitPlatformAt;
@@ -37,7 +41,7 @@ namespace Bullwhip.Items {
 			IDictionary<Vector2, IEnumerable<Item>> hitItemsAt = new Dictionary<Vector2, IEnumerable<Item>>();
 			IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt = new Dictionary<Vector2, IEnumerable<Player>>();
 
-			///
+			//
 
 			bool hitAnything = BullwhipItem.CastWhipScanRay(
 				whipOwner: player,
@@ -59,8 +63,8 @@ namespace Bullwhip.Items {
 			IEnumerable<Item> hitItems = hitItemsAt.SelectMany( kv=>kv.Value );
 			IEnumerable<Player> hitPlayers = hitPlayersAt.SelectMany( kv=>kv.Value );
 
-			///
-
+			//
+			
 			BullwhipItem.ApplyWhipStrike(
 				whipOwner: player,
 				start: start,
@@ -71,22 +75,27 @@ namespace Bullwhip.Items {
 				hitNpcs: hitNpcs,
 				hitProjs: hitProjs,
 				hitItems: hitItems,
-				hitPlayers: hitPlayers
+				hitPlayers: hitPlayers,
+				fxOnly: syncIfClient && Main.netMode == NetmodeID.MultiplayerClient	// Sync this shit
 			);
 
+			//
+
 			if( syncIfClient && Main.netMode == NetmodeID.MultiplayerClient ) {
-				BullwhipHitsPacket.BroadcastFromClient(
-					player: player,
-					start: start,
-					direction: direction,
-					hitTileAt: hitTileAt,
-					hitPlatformAt: hitPlatformAt,
-					breakables: breakables,
-					hitNpcs: hitNpcs,
-					hitProjs: hitProjs,
-					hitItems: hitItems,
-					hitPlayers: hitPlayers
-				);
+				if( player.whoAmI == Main.myPlayer ) {
+					BullwhipHitsPacket.BroadcastFromClient(
+						player: player,
+						start: start,
+						direction: direction,
+						hitTileAt: hitTileAt,
+						hitPlatformAt: hitPlatformAt,
+						breakables: breakables,
+						hitNpcs: hitNpcs,
+						hitProjs: hitProjs,
+						hitItems: hitItems,
+						hitPlayers: hitPlayers
+					);
+				}
 			}
 		}
 

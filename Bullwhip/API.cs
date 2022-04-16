@@ -12,6 +12,7 @@ namespace Bullwhip {
 			/*Item whipItem,
 			Projectile whipProjectile,*/
 			Entity target,
+			bool fxOnly,
 			ref bool isDebuffImmune
 		);
 
@@ -31,9 +32,10 @@ namespace Bullwhip {
 					/*Item whipItem,
 					Projectile whipProjectile,*/
 					Entity target,
+					bool fxOnly,
 					ref bool isDebuffImmune ) {
 			foreach( OnPreBullwhipHitEntity hook in ModContent.GetInstance<BullwhipAPI>().PreHitHooks ) {
-				if( !hook.Invoke(whipOwner, /*whipItem, whipProjectile,*/ target, ref isDebuffImmune) ) {
+				if( !hook.Invoke(whipOwner, /*whipItem, whipProjectile,*/ target, fxOnly, ref isDebuffImmune ) ) {
 					return false;
 				}
 			}

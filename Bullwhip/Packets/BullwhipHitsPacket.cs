@@ -156,7 +156,8 @@ namespace Bullwhip.Packets {
 					hitNpcs: this.HitNpcsWhos.Select( who=>Main.npc[who] ),
 					hitProjs: this.HitNpcsWhos.Select( who=>Main.projectile[who] ),
 					hitItems: this.HitNpcsWhos.Select( who=>Main.item[who] ),
-					hitPlayers: this.HitNpcsWhos.Select( who=>Main.player[who] )
+					hitPlayers: this.HitNpcsWhos.Select( who=>Main.player[who] ),
+					fxOnly: false
 				);
 			}
 		}
@@ -170,7 +171,11 @@ namespace Bullwhip.Packets {
 				return;
 			}
 
+			//
+
 			this.Receive();
+
+			//
 
 			SimplePacket.SendToClient( this, -1, this.PlayerWho );
 		}

@@ -67,12 +67,17 @@ namespace Bullwhip.Items {
 
 		public static void GrabPlatform( Player player, int tileX, int tileY ) {
 			var bi = ModContent.GetInstance<BullwhipItem>();
-			var target = new Vector2( tileX << 4, tileY << 4 );
 
 			bi.SoundInstance?.Stop();
 
+			//
+
+			var target = new Vector2( tileX << 4, tileY << 4 );
 			var myplayer = player.GetModPlayer<BullwhipPlayer>();
+
 			myplayer.SetPullHeading( player.Center - target );
+
+			//
 
 			Main.PlaySound( SoundID.Dig, target );
 		}

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -21,41 +20,54 @@ namespace Bullwhip.Items {
 					IEnumerable<NPC> hitNpcs,
 					IEnumerable<Projectile> hitProjs,
 					IEnumerable<Item> hitItems,
-					IEnumerable<Player> hitPlayers ) {
+					IEnumerable<Player> hitPlayers,
+					bool fxOnly ) {
 //LogHelpers.Log("WHIP 2 - start:"+start.ToShortString()+", hitNpcsAt:"+hitNpcsAt.Count2D()+", hitProjsAt:"+hitProjsAt.Count2D()+", hitItemsAt:"+hitItemsAt.Count2D());
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			Vector2 maxPos = start + (direction * maxWhipDist);
+
+			//
 
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 				Dust.QuickDust( maxPos, Color.Red );
 			}
 
-			foreach( (int tileX, ISet<int> tileYs) in breakables ) {
-				foreach( int tileY in tileYs ) {
+			//
+
+			if( !fxOnly ) {
+				foreach( (int tileX, ISet<int> tileYs) in breakables ) {
+					foreach( int tileY in tileYs ) {
 /*Timers.SetTimer("break_"+tileX+"_"+tileY, 50, false, () => {
 	Dust.QuickDust( new Point(tileX, tileY), Color.Red );
 	return true;
 } );*/
-					WorldGen.KillTile( tileX, tileY );
+						WorldGen.KillTile( tileX, tileY );
 
-					if( Main.netMode != 0 ) {
-						NetMessage.SendData( MessageID.TileChange, -1, -1, null, 0, (float)tileX, (float)tileY, 0f, 0, 0, 0 );
+						if( Main.netMode != NetmodeID.SinglePlayer ) {
+							NetMessage.SendData( MessageID.TileChange, -1, -1, null, 0, (float)tileX, (float)tileY, 0f, 0, 0, 0 );
+						}
 					}
 				}
 			}
 
-			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPC( whipOwner, direction, hitNpcs );
-			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectile( whipOwner, direction, hitProjs );
-			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItem( whipOwner, direction, hitItems );
-			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayer( whipOwner, direction, hitPlayers );
+			//
 
-			if( !isNpcHit ) {
+			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPC( whipOwner, direction, hitNpcs, fxOnly );
+			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectile( whipOwner, direction, hitProjs, fxOnly );
+			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItem( whipOwner, direction, hitItems, fxOnly );
+			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayer( whipOwner, direction, hitPlayers, fxOnly );
+
+			//
+
+			if( !isNpcHit && !isPlrHit && !fxOnly ) {
 				if( hitPlatformAt.HasValue ) {
 					BullwhipItem.GrabPlatform( whipOwner, hitPlatformAt.Value.TileX, hitPlatformAt.Value.TileY );
 				}
 			}
 
-			if( !isNpcHit ) {
+			//
+
+			if( !isNpcHit && !isPlrHit ) {
 				if( !hitTileAt.HasValue && !hitPlatformAt.HasValue ) {
 					BullwhipItem.CreateHitAirFx( maxPos );
 				} else if( hitPlatformAt.HasValue ) {
@@ -72,7 +84,8 @@ namespace Bullwhip.Items {
 		private static bool ApplyWhipStrikeOnNPC(
 					Player player,
 					Vector2 direction,
-					IEnumerable<NPC> hitNpcs ) {
+					IEnumerable<NPC> hitNpcs,
+					bool fxOnly ) {
 					//IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt ) {
 			bool isNpcHit = false;
 			var checkedNpcs = new HashSet<NPC>();
@@ -87,7 +100,7 @@ namespace Bullwhip.Items {
 
 				//
 
-				BullwhipItem.StrikeNPC( player, direction, /*target,*/ npc );
+				BullwhipItem.StrikeNPC_If( player, direction, /*target,*/ npc, fxOnly );
 
 				isNpcHit = true;
 			}
@@ -98,7 +111,8 @@ namespace Bullwhip.Items {
 		private static bool ApplyWhipStrikeOnProjectile(
 					Player player,
 					Vector2 direction,
-					IEnumerable<Projectile> hitProjs ) {
+					IEnumerable<Projectile> hitProjs,
+					bool fxOnly ) {
 					//IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
 			var checkedProjs = new HashSet<Projectile>();
 			bool isProjHit = false;
@@ -112,10 +126,13 @@ namespace Bullwhip.Items {
 				checkedProjs.Add( proj );
 
 				//
+				
+				if( BullwhipItem.StrikeProjectile_If(player, direction, /*target,*/ proj, fxOnly) ) {
+					proj.friendly = true;
+					proj.hostile = false;
+				}
 
-				BullwhipItem.StrikeProjectile_If( player, direction, /*target,*/ proj );
-				proj.friendly = true;
-				proj.hostile = false;
+				//
 
 				isProjHit = true;
 			}
@@ -126,7 +143,8 @@ namespace Bullwhip.Items {
 		private static bool ApplyWhipStrikeOnItem(
 					Player player,
 					Vector2 direction,
-					IEnumerable<Item> hitItems ) {
+					IEnumerable<Item> hitItems,
+					bool fxOnly ) {
 					//IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
 			var checkedItems = new HashSet<Item>();
 			bool isItemHit = false;
@@ -141,7 +159,9 @@ namespace Bullwhip.Items {
 
 				//
 
-				BullwhipItem.StrikeItem_If( player, direction, /*target,*/ item );
+				BullwhipItem.StrikeItem_If( player, direction, /*target,*/ item, fxOnly );
+
+				//
 
 				isItemHit = true;
 			}
@@ -152,7 +172,8 @@ namespace Bullwhip.Items {
 		private static bool ApplyWhipStrikeOnPlayer(
 					Player player,
 					Vector2 direction,
-					IEnumerable<Player> hitPlayers ) {
+					IEnumerable<Player> hitPlayers,
+					bool fxOnly ) {
 					//IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
 			var checkedPlayers = new HashSet<Player>();
 			bool isPlayerHit = false;
@@ -167,7 +188,9 @@ namespace Bullwhip.Items {
 
 				//
 
-				BullwhipItem.StrikePlayer_If( player, direction, /*target,*/ plr );
+				BullwhipItem.StrikePlayer_If( player, direction, /*target,*/ plr, fxOnly );
+
+				//
 
 				isPlayerHit = true;
 			}
