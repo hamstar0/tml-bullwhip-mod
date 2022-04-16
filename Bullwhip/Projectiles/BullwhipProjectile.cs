@@ -87,7 +87,7 @@ namespace Bullwhip.Projectiles {
 		}
 
 		public override void Kill( int timeLeft ) {
-			if( Main.netMode == NetmodeID.Server ) {
+			if( Main.netMode == NetmodeID.MultiplayerClient ) {
 				return;
 			}
 
@@ -97,14 +97,16 @@ namespace Bullwhip.Projectiles {
 			if( plr?.active != true ) {
 				return;
 			}
-			if( Main.myPlayer != plr.whoAmI ) {
-				return;	// <- Local sourced only
-			}
 
 			//
 
 			//LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
-			BullwhipItem.CastStrike( plr, this.projectile.velocity, false );
+			BullwhipItem.CastStrike(
+				player: plr,
+				direction: this.projectile.velocity,
+				fxOnly: false,
+				syncIfServer: true
+			);
 		}
 	}
 }

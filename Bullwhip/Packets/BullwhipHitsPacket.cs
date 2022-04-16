@@ -13,7 +13,7 @@ using Bullwhip.Items;
 
 namespace Bullwhip.Packets {
 	class BullwhipHitsPacket : SimplePacketPayload {
-		public static void BroadcastFromClient(
+		public static void BroadcastFromServer(
 					Player player,
 					Vector2 start,
 					Vector2 direction,
@@ -23,9 +23,10 @@ namespace Bullwhip.Packets {
 					IEnumerable<NPC> hitNpcs,
 					IEnumerable<Projectile> hitProjs,
 					IEnumerable<Item> hitItems,
-					IEnumerable<Player> hitPlayers ) {
-			if( Main.netMode != NetmodeID.MultiplayerClient ) {
-				throw new ModLibsException("Not client");
+					IEnumerable<Player> hitPlayers,
+					bool fxOnly ) {
+			if( Main.netMode != NetmodeID.Server ) {
+				throw new ModLibsException("Not server");
 			}
 
 			var payload = new BullwhipHitsPacket(
@@ -38,9 +39,10 @@ namespace Bullwhip.Packets {
 				hitNpcWhos: hitNpcs.Select( n=>n.whoAmI ).ToArray(),
 				hitProjWhos: hitProjs.Select( p=>Array.IndexOf(Main.projectile, p) ).ToArray(),
 				hitItemWhos: hitItems.Select( i=>Array.IndexOf(Main.item, i) ).ToArray(),
-				hitPlayerWhos: hitPlayers.Select( p=>p.whoAmI ).ToArray()
+				hitPlayerWhos: hitPlayers.Select( p=>p.whoAmI ).ToArray(),
+				fxOnly: fxOnly
 			);
-			SimplePacket.SendToServer( payload );
+			SimplePacket.SendToClient( payload, -1, -1 );
 		}
 
 
@@ -68,6 +70,8 @@ namespace Bullwhip.Packets {
 		public int[] HitItemWhos;
 		public int[] HitPlayerWhos;
 
+		public bool FxOnly;
+
 
 
 		////////////////
@@ -84,7 +88,8 @@ namespace Bullwhip.Packets {
 					int[] hitNpcWhos,
 					int[] hitProjWhos,
 					int[] hitItemWhos,
-					int[] hitPlayerWhos ) {
+					int[] hitPlayerWhos,
+					bool fxOnly ) {
 			this.PlayerWho = playerWho;
 
 			this.StartX = start.X;
@@ -123,6 +128,8 @@ namespace Bullwhip.Packets {
 			this.HitProjWhos = hitProjWhos;
 			this.HitItemWhos = hitItemWhos;
 			this.HitPlayerWhos = hitPlayerWhos;
+
+			this.FxOnly = fxOnly;
 		}
 
 
@@ -157,7 +164,7 @@ namespace Bullwhip.Packets {
 					hitProjs: this.HitNpcsWhos.Select( who=>Main.projectile[who] ),
 					hitItems: this.HitNpcsWhos.Select( who=>Main.item[who] ),
 					hitPlayers: this.HitNpcsWhos.Select( who=>Main.player[who] ),
-					fxOnly: false
+					fxOnly: this.FxOnly
 				);
 			}
 		}
@@ -165,19 +172,7 @@ namespace Bullwhip.Packets {
 		////
 
 		public override void ReceiveOnServer( int fromWho ) {
-			Player plr = Main.player[ this.PlayerWho ];
-			if( plr?.active != true ) {
-				LogLibraries.Alert( "Invalid whipper player index " + this.PlayerWho );
-				return;
-			}
-
-			//
-
-			this.Receive();
-
-			//
-
-			SimplePacket.SendToClient( this, -1, this.PlayerWho );
+			throw new ModLibsException( "Not implemented." );
 		}
 
 		public override void ReceiveOnClient() {
@@ -186,6 +181,8 @@ namespace Bullwhip.Packets {
 				LogLibraries.Alert( "Invalid whipper player index " + this.PlayerWho );
 				return;
 			}
+
+			//
 
 			this.Receive();
 		}

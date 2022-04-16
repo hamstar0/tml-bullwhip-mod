@@ -18,8 +18,9 @@ namespace Bullwhip.Items {
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="direction"></param>
-		/// <param name="syncIfClient"></param>
-		public static void CastStrike( Player player, Vector2 direction, bool syncIfClient ) {
+		/// <param name="fxOnly"></param>
+		/// <param name="syncIfServer"></param>
+		public static void CastStrike( Player player, Vector2 direction, bool fxOnly, bool syncIfServer ) {
 			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MinimumWhipHitDist) );
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			direction.Normalize();
@@ -76,29 +77,30 @@ namespace Bullwhip.Items {
 				hitProjs: hitProjs,
 				hitItems: hitItems,
 				hitPlayers: hitPlayers,
-				fxOnly: syncIfClient && Main.netMode == NetmodeID.MultiplayerClient	// Sync this shit
+				fxOnly: fxOnly
 			);
 
 			//
 
-			if( syncIfClient && Main.netMode == NetmodeID.MultiplayerClient ) {
-				if( player.whoAmI == Main.myPlayer ) {
-					BullwhipHitsPacket.BroadcastFromClient(
-						player: player,
-						start: start,
-						direction: direction,
-						hitTileAt: hitTileAt,
-						hitPlatformAt: hitPlatformAt,
-						breakables: breakables,
-						hitNpcs: hitNpcs,
-						hitProjs: hitProjs,
-						hitItems: hitItems,
-						hitPlayers: hitPlayers
-					);
-				}
+			if( syncIfServer && Main.netMode == NetmodeID.Server ) {
+				BullwhipHitsPacket.BroadcastFromServer(
+					player: player,
+					start: start,
+					direction: direction,
+					hitTileAt: hitTileAt,
+					hitPlatformAt: hitPlatformAt,
+					breakables: breakables,
+					hitNpcs: hitNpcs,
+					hitProjs: hitProjs,
+					hitItems: hitItems,
+					hitPlayers: hitPlayers,
+					fxOnly: fxOnly
+				);
 			}
 		}
 
+
+		////////////////
 
 		/// <summary>
 		/// Casts a scan ray to determine what tile, breakable tiles, npcs, projectiles, items, or players get hit as if by
