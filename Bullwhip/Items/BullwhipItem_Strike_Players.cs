@@ -70,36 +70,54 @@ namespace Bullwhip.Items {
 			//
 
 			if( !fxOnly ) {
-				var config = BullwhipConfig.Instance;
-
-				bool ignorePvp = config.Get<bool>( nameof(config.WhipIgnoresPvP) );
-				bool onlyHitsIfPvp = !ignorePvp;
-
-				//
-
-				int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
-				float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
-
-				targetPlr.Hurt(
-					damageSource: PlayerDeathReason.ByPlayer(player.whoAmI),
-					Damage: dmg,
-					hitDirection: player.direction,
-					pvp: onlyHitsIfPvp,	// LUL
-					quiet: Main.netMode != NetmodeID.Server
-				);
-
-				targetPlr.velocity += direction * kb;
-
-				//
-
-				if( syncIfServer && Main.netMode == NetmodeID.Server ) {
-					NetMessage.SendData( MessageID.SyncPlayer, -1, -1, null, targetPlr.whoAmI );
-				}
+				BullwhipItem.StrikePlayerNoFx( player, direction, targetPlr, syncIfServer );
 			}
 
 			//
 
 			BullwhipItem.CreateHitEntityFx( targetPlr.Center );
+		}
+
+
+		////////////////
+
+		public static void StrikePlayerNoFx(
+					Player player,
+					Vector2 direction,
+					/*Vector2 hitWorldPosition,*/
+					Player targetPlr,
+					bool syncIfServer ) {
+			var config = BullwhipConfig.Instance;
+
+			bool ignorePvp = config.Get<bool>( nameof(config.WhipIgnoresPvP) );
+			bool onlyHitsIfPvp = !ignorePvp;
+
+			//
+
+			int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
+			float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
+			PlayerDeathReason reason = PlayerDeathReason.ByPlayer( player.whoAmI );
+
+			bool syncHurt = syncIfServer && Main.netMode == NetmodeID.Server;
+
+			//
+
+			targetPlr.Hurt(
+				damageSource: reason,
+				Damage: dmg,
+				hitDirection: player.direction,
+				pvp: onlyHitsIfPvp,	// LUL
+				quiet: !syncHurt
+			);
+
+			targetPlr.velocity += direction * kb;
+
+			//
+
+			if( syncHurt ) {
+				NetMessage.SendPlayerHurt( targetPlr.whoAmI, reason, dmg, player.direction, false, onlyHitsIfPvp, -1 );
+				NetMessage.SendData( MessageID.SyncPlayer, -1, -1, null, targetPlr.whoAmI );
+			}
 		}
 	}
 }

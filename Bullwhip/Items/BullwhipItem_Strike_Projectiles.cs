@@ -78,20 +78,7 @@ namespace Bullwhip.Items {
 			//
 
 			if( !fxOnly ) {
-				float speed = proj.velocity.Length();
-				direction.Normalize();
-				proj.velocity.Normalize();
-
-				proj.velocity = Vector2.Normalize( direction + proj.velocity );
-				proj.velocity *= speed;
-
-				//
-
-				if( syncIfServer && Main.netMode == NetmodeID.Server ) {
-					int projWho = Main.projectileIdentity[proj.owner, proj.projUUID];
-
-					NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, projWho );
-				}
+				BullwhipItem.StrikeProjectileNoFx( player, direction, proj, syncIfServer );
 			}
 
 			//
@@ -102,6 +89,31 @@ namespace Bullwhip.Items {
 			//
 
 			return true;
+		}
+
+
+		////
+
+		public static void StrikeProjectileNoFx(
+					Player player,
+					Vector2 direction,
+					/*Vector2 hitWorldPosition,*/
+					Projectile proj,
+					bool syncIfServer ) {
+			float speed = proj.velocity.Length();
+			direction.Normalize();
+			proj.velocity.Normalize();
+
+			proj.velocity = Vector2.Normalize( direction + proj.velocity );
+			proj.velocity *= speed;
+
+			//
+
+			if( syncIfServer && Main.netMode == NetmodeID.Server ) {
+				int projWho = Main.projectileIdentity[proj.owner, proj.projUUID];
+
+				NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, projWho );
+			}
 		}
 	}
 }

@@ -22,8 +22,8 @@ namespace Bullwhip.Items {
 		/// <param name="syncStrikeAction">After deciding how the strike should work, this indicates whether to sync it
 		/// to the server and/or other players.</param>
 		public static void CastStrike( Player player, Vector2 direction, bool fxOnly, bool syncStrikeAction ) {
-			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MinimumWhipHitDist) );
-			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
+			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof( BullwhipConfig.MinimumWhipHitDist ) );
+			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof( BullwhipConfig.MaximumWhipHitDist ) );
 			direction.Normalize();
 
 			//
@@ -60,13 +60,13 @@ namespace Bullwhip.Items {
 				hitPlayersAt: ref hitPlayersAt
 			);
 
-			IEnumerable<NPC> hitNpcs = hitNpcsAt.SelectMany( kv=>kv.Value );
-			IEnumerable<Projectile> hitProjs = hitProjsAt.SelectMany( kv=>kv.Value );
-			IEnumerable<Item> hitItems = hitItemsAt.SelectMany( kv=>kv.Value );
-			IEnumerable<Player> hitPlayers = hitPlayersAt.SelectMany( kv=>kv.Value );
+			IEnumerable<NPC> hitNpcs = hitNpcsAt.SelectMany( kv => kv.Value );
+			IEnumerable<Projectile> hitProjs = hitProjsAt.SelectMany( kv => kv.Value );
+			IEnumerable<Item> hitItems = hitItemsAt.SelectMany( kv => kv.Value );
+			IEnumerable<Player> hitPlayers = hitPlayersAt.SelectMany( kv => kv.Value );
 
 			//
-			
+
 			BullwhipItem.ApplyStrike(
 				whipOwner: player,
 				start: start,
@@ -162,81 +162,50 @@ namespace Bullwhip.Items {
 			var currHitItemsAt = hitItemsAt;
 			var currHitPlayersAt = hitPlayersAt;
 
-			bool checkPerUnit( Vector2 wldPos ) {
-				// Once we've hit a tile, only continue checking for items
-				if( isTileHit && !isCastStoppedExceptItems ) {
-					isCastStoppedExceptItems = true;
-					currHitNpcsAt = null;
-					currHitProjsAt = null;
-					currHitPlayersAt = null;
-				}
-
-				BullwhipItem.CheckCollisionPerUnit(
+			bool CheckPerUnit( Vector2 wldPos ) {
+				return BullwhipItem.CastStrikeScanPerUnit(
 					whipOwner: whipOwner,
 					start: start,
-					wldPos: wldPos,
+					direction: direction,
 					minDist: minDist,
+					maxDist: maxDist,
+					wldPos: wldPos,
+					isTileHit: ref isTileHit,
+					isCastStoppedExceptItems: ref isCastStoppedExceptItems,
 					hitNpcsAt: ref currHitNpcsAt,
 					hitProjsAt: ref currHitProjsAt,
 					hitItemsAt: ref currHitItemsAt,
-					hitPlayersAt: ref currHitPlayersAt,
-					hitNpc: out bool hitNpc,
-					hitProj: out bool hitProj
+					hitPlayersAt: ref currHitPlayersAt
 				);
-
-				if( hitNpc ) {
-					currHitNpcsAt = null;
-				}
-				if( hitProj ) {
-					currHitProjsAt = null;
-				}
-
-				return false;
 			};
 
 			//
 
-			var hitTiles = new HashSet<(int, int)>();
+			ISet<(int x, int y)> hitTiles = new HashSet<(int, int)>();
 			(int TileX, int TileY)? myHitTileAt = null;
 			(int TileX, int TileY)? myHitPlatformAt = null;
 
 			var currBreakables = breakables;
 
-			bool checkPerTile( int tileX, int tileY ) {
-				if( isTileHit ) {
-					return false;
-				}
-
-				bool isTile, isPlatform, isBreakable;
-				isTile = BullwhipItem.FindStrikeTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
-				IEnumerable<(int TileX, int TileY)> myBreakables = BullwhipItem.FindNearbyBreakableTiles( tileX, tileY );
-
-				// Account for adjacent breakable tiles
-				foreach( (int breakableTileX, int breakableTileY) in myBreakables ) {
-					currBreakables.Set2D( breakableTileX, breakableTileY );
-				}
-
-				if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
-					Dust.QuickDust( new Point(tileX, tileY), isTile ? Color.Red : Color.Lime );
-				}
-
-				if( isTile ) {
-					isTile = hitTiles.Contains( (tileX, tileY) );
-					if( isTile ) {
-						myHitTileAt = (tileX, tileY);
-					}
-					hitTiles.Add( (tileX, tileY) );
-				}
-				if( isPlatform && !myHitPlatformAt.HasValue ) {
-					myHitPlatformAt = (tileX, tileY);
-				}
-				if( isBreakable ) {
-					isTile = false;
-					currBreakables.Set2D( tileX, tileY );
-				}
-
-				isTileHit = isTile;
-				return false;   //used to use isTile
+			bool CheckPerTile( int tileX, int tileY ) {
+				return BullwhipItem.CastStrikeScanPerTile(
+					whipOwner: whipOwner,
+					start: start,
+					direction: direction,
+					minDist: minDist,
+					maxDist: maxDist,
+					tileX: tileX,
+					tileY: tileY,
+					isTileHit: ref isTileHit,
+					hitTiles: ref hitTiles,
+					hitTileAt: ref myHitTileAt,
+					hitPlatformAt: ref myHitPlatformAt,
+					breakables: ref currBreakables,
+					hitNpcsAt: ref currHitNpcsAt,
+					hitProjsAt: ref currHitProjsAt,
+					hitItemsAt: ref currHitItemsAt,
+					hitPlayersAt: ref currHitPlayersAt
+				);
 			};
 
 			//
@@ -246,13 +215,129 @@ namespace Bullwhip.Items {
 				direction: direction,
 				maxWorldDistance: maxDist,
 				bothChecksOnly: false,
-				checkPerUnit: checkPerUnit,
-				checkPerTile: checkPerTile
+				checkPerUnit: CheckPerUnit,
+				checkPerTile: CheckPerTile
 			);
 
 			hitPlatformAt = myHitPlatformAt;
 			hitTileAt = myHitTileAt;
 			return found;
+		}
+
+
+		////
+
+		private static bool CastStrikeScanPerUnit(
+					Player whipOwner,
+					Vector2 start,
+					Vector2 direction,
+					int minDist,
+					int maxDist,
+					Vector2 wldPos,
+					ref bool isTileHit,
+					ref bool isCastStoppedExceptItems,
+					ref IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
+					ref IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
+					ref IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
+					ref IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
+			// Once we've hit a tile, only continue checking for items
+			if( isTileHit && !isCastStoppedExceptItems ) {
+				isCastStoppedExceptItems = true;
+				hitNpcsAt = null;
+				hitProjsAt = null;
+				hitPlayersAt = null;
+			}
+
+			//
+
+			BullwhipItem.CheckCollisionPerUnit(
+				whipOwner: whipOwner,
+				start: start,
+				wldPos: wldPos,
+				minDist: minDist,
+				hitNpcsAt: ref hitNpcsAt,
+				hitProjsAt: ref hitProjsAt,
+				hitItemsAt: ref hitItemsAt,
+				hitPlayersAt: ref hitPlayersAt,
+				hitNpc: out bool hitNpc,
+				hitProj: out bool hitProj
+			);
+
+			if( hitNpc ) {
+				hitNpcsAt = null;
+			}
+			if( hitProj ) {
+				hitProjsAt = null;
+			}
+
+			//
+
+			return false;
+		}
+
+
+		private static bool CastStrikeScanPerTile(
+					Player whipOwner,
+					Vector2 start,
+					Vector2 direction,
+					int minDist,
+					int maxDist,
+					int tileX,
+					int tileY,
+					ref bool isTileHit,
+					ref ISet<(int x, int y)> hitTiles,
+					ref (int TileX, int TileY)? hitTileAt,
+					ref (int TileX, int TileY)? hitPlatformAt,
+					ref IDictionary<int, ISet<int>> breakables,
+					ref IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt,
+					ref IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt,
+					ref IDictionary<Vector2, IEnumerable<Item>> hitItemsAt,
+					ref IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
+			if( isTileHit ) {
+				return false;
+			}
+
+			//
+
+			bool isTile, isPlatform, isBreakable;
+			isTile = BullwhipItem.FindStrikeTileCollisionAt( tileX, tileY, out isPlatform, out isBreakable );
+
+			//
+
+			IEnumerable<(int TileX, int TileY)> myBreakables = BullwhipItem.FindNearbyBreakableTiles( tileX, tileY );
+
+			// Account for adjacent breakable tiles
+			foreach( (int breakableTileX, int breakableTileY) in myBreakables ) {
+				breakables.Set2D( breakableTileX, breakableTileY );
+			}
+
+			//
+
+			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
+				Dust.QuickDust( new Point( tileX, tileY ), isTile ? Color.Red : Color.Lime );
+			}
+
+			//
+
+			if( isTile ) {
+				isTile = hitTiles.Contains( (tileX, tileY) );
+				if( isTile ) {
+					hitTileAt = (tileX, tileY);
+				}
+				hitTiles.Add( (tileX, tileY) );
+			}
+			if( isPlatform && !hitPlatformAt.HasValue ) {
+				hitPlatformAt = (tileX, tileY);
+			}
+			if( isBreakable ) {
+				isTile = false;
+				breakables.Set2D( tileX, tileY );
+			}
+
+			//
+
+			isTileHit = isTile;
+			return false;   //used to use isTile
 		}
 	}
 }

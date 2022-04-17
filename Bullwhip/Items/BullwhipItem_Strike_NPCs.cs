@@ -66,51 +66,17 @@ namespace Bullwhip.Items {
 
 			//
 
-			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
-				if( !fxOnly ) {
-					NPCLibraries.Kill( npc, false );
-				}
-			} else {
-				if( !fxOnly ) {
-					var config = BullwhipConfig.Instance;
-					int dmg = config.Get<int>( nameof( config.WhipDamage ) );
-					float kb = config.Get<float>( nameof( config.WhipKnockback ) );
+			if( !fxOnly ) {
+				BullwhipItem.StrikeNPCNoFx( player, direction, npc, syncIfServer );
+			}
 
-					if( npc.aiStyle == 1 ) {	// slimes
-						kb *= 0.65f;
-					}
+			//
 
-					//
+			Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
 
-					BullwhipItem.StrikeNPC_AI( player, /*hitWorldPosition,*/ npc, ref kb );
-
-					npc.StrikeNPC( dmg, kb, player.direction );
-
-					//
-
-					if( syncIfServer && Main.netMode == NetmodeID.Server ) {
-						NetMessage.SendData(
-							msgType: MessageID.StrikeNPC,
-							remoteClient: -1,
-							ignoreClient: -1,
-							text: null,
-							number: npc.whoAmI,
-							number2: dmg,
-							number3: kb,
-							number4: player.direction,
-							number5: false.ToInt()
-						);
-					}
-				}
-
-				//
-
-				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
-
-				if( tricksterMod != null ) {
-					if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
-						BullwhipItem.StrikeTrickster_If( player, npc, fxOnly );
-					}
+			if( tricksterMod != null ) {
+				if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
+					BullwhipItem.StrikeTrickster_If( player, npc, fxOnly );
 				}
 			}
 
@@ -120,8 +86,61 @@ namespace Bullwhip.Items {
 //LogHelpers.Log("WHIP 3 "+npc.TypeName+" ("+npc.whoAmI+"), direction:"+direction.ToShortString()+", hitWorldPosition:"+hitWorldPosition.ToShortString());
 		}
 
+
 		////
-		
+
+		public static void StrikeNPCNoFx(
+					Player player,
+					Vector2 direction,
+					/*Vector2 hitWorldPosition,*/
+					NPC npc,
+					bool syncIfServer ) {
+			bool sync = syncIfServer && Main.netMode == NetmodeID.Server;
+
+			//
+
+			if( npc.type == NPCID.Bee || npc.type == NPCID.BeeSmall ) {
+				NPCLibraries.Kill( npc, sync );
+
+				return;
+			}
+
+			//
+			
+			var config = BullwhipConfig.Instance;
+			int dmg = config.Get<int>( nameof( config.WhipDamage ) );
+			float kb = config.Get<float>( nameof( config.WhipKnockback ) );
+
+			if( npc.aiStyle == 1 ) {	// slimes
+				kb *= 0.65f;
+			}
+
+			//
+
+			BullwhipItem.StrikeNPC_AI( player, /*hitWorldPosition,*/ npc, ref kb );
+
+			npc.StrikeNPC( dmg, kb, player.direction );
+
+			//
+
+			if( sync ) {
+				NetMessage.SendData(
+					msgType: MessageID.StrikeNPC,
+					remoteClient: -1,
+					ignoreClient: -1,
+					text: null,
+					number: npc.whoAmI,
+					number2: dmg,
+					number3: kb,
+					number4: player.direction,
+					number5: false.ToInt()
+				);
+			}
+		}
+
+
+		////////////////
+
 		private static void StrikeNPC_AI( Player player, /*Vector2 hitWorldPosition,*/ NPC npc, ref float knockback ) {
 			var config = BullwhipConfig.Instance;
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
