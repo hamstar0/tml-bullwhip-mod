@@ -17,9 +17,9 @@ namespace Bullwhip.Items {
 		/// <param name="player"></param>
 		/// <param name="direction"></param>
 		/// <param name="fxOnly"></param>
-		/// <param name="syncStrikeAction">After deciding how the strike should work, this indicates whether to sync it
-		/// to the server and/or other players.</param>
-		public static void CastStrike( Player player, Vector2 direction, bool fxOnly, bool syncStrikeAction ) {
+		/// <param name="syncWholeStrikeAction">After deciding how the strike should work, this indicates whether
+		/// to sync it to the server and/or other players.</param>
+		public static void CastStrike( Player player, Vector2 direction, bool fxOnly, bool syncWholeStrikeAction ) {
 			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof( BullwhipConfig.MinimumWhipHitDist ) );
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof( BullwhipConfig.MaximumWhipHitDist ) );
 			direction.Normalize();
@@ -77,12 +77,12 @@ namespace Bullwhip.Items {
 				hitItems: hitItems,
 				hitPlayers: hitPlayers,
 				fxOnly: fxOnly,
-				syncSpecificHitsIfServer: syncStrikeAction
+				syncSpecificHitsIfServer: syncWholeStrikeAction
 			);
 
 			//
 
-			if( syncStrikeAction ) {
+			if( syncWholeStrikeAction ) {
 				if( Main.netMode == NetmodeID.MultiplayerClient ) {
 					BullwhipHitsPacket.BroadcastFromClient(
 						player: player,

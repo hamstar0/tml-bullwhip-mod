@@ -205,7 +205,7 @@ namespace Bullwhip.Packets {
 				hitItems: this.HitItemWhos.Select( who => Main.item[who] ),
 				hitPlayers: this.HitPlayerWhos.Select( who => Main.player[who] ),
 				fxOnly: this.FxOnly || (this.FxOnlyToClients && Main.netMode == NetmodeID.MultiplayerClient),
-				syncSpecificHitsIfServer: false
+				syncSpecificHitsIfServer: true
 			);
 		}
 

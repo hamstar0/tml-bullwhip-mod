@@ -110,7 +110,7 @@ namespace Bullwhip.Projectiles {
 				player: plr,	// <- Current player only
 				direction: this.projectile.velocity,
 				fxOnly: false,
-				syncStrikeAction: true
+				syncWholeStrikeAction: true
 			);
 		}
 	}
