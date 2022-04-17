@@ -21,6 +21,12 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<Projectile> projs) in hitProjsAt ) {
 			foreach( Projectile proj in hitProjs ) {
+				if( proj?.active != true ) {
+					continue;
+				}
+
+				//
+
 				if( checkedProjs.Contains( proj ) ) {
 					continue;
 				}

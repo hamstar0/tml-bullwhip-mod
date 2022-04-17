@@ -23,7 +23,7 @@ namespace Bullwhip.Projectiles {
 		
 		public bool IsBegun {
 			get => this.projectile.ai[0] != 0f;
-			set => this.projectile.ai[0] = (value ? 1 : 0);
+			set => this.projectile.ai[0] = (value ? 1f : 0f);
 		}
 
 		public bool IsLastFrame {
@@ -54,14 +54,17 @@ namespace Bullwhip.Projectiles {
 			this.projectile.width = 384;
 			this.projectile.height = 72;
 			this.projectile.aiStyle = -1;   // = 19;
-			this.projectile.penetrate = -1;
+
+			//this.projectile.penetrate = 5;  //-1;
+			//this.projectile.usesLocalNPCImmunity = true;
+			//this.projectile.localNPCHitCooldown = -1;
 
 			this.projectile.alpha = 0;
 
 			this.projectile.melee = true;
-			//this.projectile.friendly = true;
-			//this.projectile.hide = true;
-			this.projectile.ownerHitCheck = true;
+			this.projectile.friendly = false;
+			this.projectile.hostile = false;
+			//this.projectile.ownerHitCheck = true;
 			this.projectile.tileCollide = false;
 
 			this.projectile.timeLeft = 3;
@@ -71,7 +74,7 @@ namespace Bullwhip.Projectiles {
 
 		////////////////
 
-		private Vector2 GetAimDirection( Player player ) {
+		private Vector2 GetAimDirection_Local( Player player ) {
 			/*if( this.projectile.frame > 4 ) {
 				return this.projectile.velocity;
 			}*/
@@ -99,7 +102,7 @@ namespace Bullwhip.Projectiles {
 			}
 
 			//
-
+			
 			//LogHelpers.Log( "whip at "+ownerPlr.position.ToShortString()+", vel:"+this.projectile.velocity.ToString() );
 			BullwhipItem.CastStrike(
 				player: plr,

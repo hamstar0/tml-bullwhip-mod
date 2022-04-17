@@ -21,6 +21,12 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<Player> plrs) in hitPlayersAt ) {
 			foreach( Player plr in hitPlayers ) {
+				if( plr?.active != true ) {
+					continue;
+				}
+
+				//
+
 				if( checkedPlayers.Contains( plr ) ) {
 					continue;
 				}

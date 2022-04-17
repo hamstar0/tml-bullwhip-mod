@@ -22,6 +22,12 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<NPC> npcs) in hitNpcsAt ) {
 			foreach( NPC npc in hitNpcs ) {
+				if( npc?.active != true ) {
+					continue;
+				}
+
+				//
+
 				if( checkedNpcs.Contains( npc ) ) {
 					continue;
 				}
@@ -77,7 +83,10 @@ namespace Bullwhip.Items {
 					npc.StrikeNPC( dmg, kb, player.direction );
 				}
 
+				//
+
 				Mod tricksterMod = ModLoader.GetMod( "TheTrickster" );
+
 				if( tricksterMod != null ) {
 					if( npc.type == tricksterMod.NPCType("TricksterNPC") ) {
 						BullwhipItem.StrikeTrickster_If( player, npc, fxOnly );
@@ -121,6 +130,7 @@ namespace Bullwhip.Items {
 				// Doesn't work on slimes
 				if( npc.aiStyle != 1 ) {
 					float confuseChance = config.Get<float>( nameof( BullwhipConfig.WhipConfuseChance ) );
+
 					if( TmlLibraries.SafelyGetRand().NextFloat() <= confuseChance ) {
 						BullwhipItem.ApplyConfuse( npc );
 					}

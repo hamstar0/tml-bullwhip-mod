@@ -13,54 +13,42 @@ namespace Bullwhip.Projectiles {
 	public partial class BullwhipProjectile : ModProjectile {
 		public override void AI() {
 			Player ownerPlr = this.projectile.GetPlayerOwner();
-			if( ownerPlr == null || ownerPlr.CCed || ownerPlr.noItems || ownerPlr.dead ) {
+			if( ownerPlr?.active != true || ownerPlr.CCed || ownerPlr.noItems || ownerPlr.dead ) {
 				this.projectile.Kill();
-
+				
 				return;
 			}
 
 			//
-			
-			bool isFirstFrame = !this.IsBegun;
 
-			if( isFirstFrame ) {
-				this.IsBegun = true;
-
-				if( Main.myPlayer != ownerPlr.whoAmI ) {
-					this.UpdatePosition_If();
-				}
-
-				this.projectile.netUpdate = true;
-			}
+			bool isCurrentPlayer = Main.netMode != NetmodeID.Server
+				&& Main.myPlayer == ownerPlr.whoAmI;
 
 			//
 
 			ownerPlr.heldProj = this.projectile.whoAmI;
-			//ownerPlr.itemTime = ownerPlr.itemAnimation;
-
-			//
-
-			if( Main.netMode != NetmodeID.Server ) {
-				if( Main.myPlayer == ownerPlr.whoAmI ) {
-					this.UpdatePosition_If();
-				} else {
-					if( !isFirstFrame ) {
-						this.projectile.spriteDirection = this.LastKnownSpriteDirection;
-						this.projectile.rotation = this.LastKnownRotation;
-					}
-				}
-			} else if( Main.netMode == NetmodeID.Server ) {
-				if( !isFirstFrame ) {
-					this.projectile.spriteDirection = this.LastKnownSpriteDirection;
-					this.projectile.rotation = this.LastKnownRotation;
-				}
-			}
 
 			//
 			
-			if( this.StepThroughFrames() ) {
-				this.projectile.netUpdate = true;
+			if( isCurrentPlayer ) {
+				this.UpdatePositionFor( ownerPlr, true );
 			}
+
+			//
+
+			if( !isCurrentPlayer ) {
+				this.projectile.spriteDirection = this.LastKnownSpriteDirection;
+				this.projectile.rotation = this.LastKnownRotation;
+			}
+
+			//
+
+			this.StepThroughFrames();
+			//if( this.StepThroughFrames() ) {
+			//	if( isCurrentPlayer ) {
+			//		this.projectile.netUpdate = true;
+			//	}
+			//}
 
 			//
 
@@ -74,13 +62,7 @@ namespace Bullwhip.Projectiles {
 
 		////////////////
 
-		private void UpdatePosition_If() {
-			Entity owner = this.projectile.GetOwner();
-			Player ownerPlr = owner as Player;
-			if( ownerPlr == null ) {
-				return;
-			}
-
+		private void UpdatePositionFor( Player ownerPlr, bool storeChangedPositionToAi1 ) {
 			// Here be dragons!
 
 			Vector2 ownerMountedCenter = ownerPlr.RotatedRelativePoint( ownerPlr.MountedCenter, true );
@@ -90,7 +72,7 @@ namespace Bullwhip.Projectiles {
 			//this.projectile.Center = ownerMountedCenter - (Vector2.Normalize(this.projectile.velocity) * 12f);
 
 			//this.projectile.rotation = this.projectile.velocity.ToRotation();
-			this.projectile.rotation = this.GetAimDirection( ownerPlr ).ToRotation();
+			this.projectile.rotation = this.GetAimDirection_Local( ownerPlr ).ToRotation();
 
 			int frameCount = Main.projFrames[this.projectile.type];
 
@@ -113,8 +95,10 @@ namespace Bullwhip.Projectiles {
 
 			//
 
-			this.projectile.ai[1] = this.projectile.rotation
-				+ (this.projectile.spriteDirection * 1000);
+			if( storeChangedPositionToAi1 ) {
+				this.projectile.ai[1] = this.projectile.rotation
+					+ ( this.projectile.spriteDirection * 1000 );
+			}
 		}
 
 
@@ -154,11 +138,15 @@ namespace Bullwhip.Projectiles {
 					proj.frame++;
 				}
 
-				if( proj.frame == 4 ) {
-					var sndPos = proj.Center;
-					sndPos += Vector2.Normalize(proj.velocity) * config.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
+				if( Main.netMode != NetmodeID.Server ) {
+					if( proj.frame == 4 ) {
+						float maxHitDist = config.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 
-					BullwhipItem.PlaySound( sndPos );
+						Vector2 sndPos = proj.Center;
+						sndPos += Vector2.Normalize(proj.velocity) * maxHitDist;
+
+						BullwhipItem.PlaySound( sndPos );
+					}
 				}
 			}
 

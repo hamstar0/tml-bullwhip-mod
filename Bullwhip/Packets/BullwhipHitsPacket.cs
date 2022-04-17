@@ -28,7 +28,7 @@ namespace Bullwhip.Packets {
 			if( Main.netMode != NetmodeID.Server ) {
 				throw new ModLibsException("Not server");
 			}
-
+			
 			var payload = new BullwhipHitsPacket(
 				playerWho: player.whoAmI,
 				start: start,
@@ -136,37 +136,36 @@ namespace Bullwhip.Packets {
 		////////////////
 
 		private void Receive() {
-			foreach( int npcWho in this.HitNpcsWhos ) {
-				(int, int)? hitTileAt = null;
-				(int, int)? hitPlatAt = null;
-				if( this.HitTileAtX != -1 ) {
-					hitTileAt = (this.HitTileAtX, this.HitTileAtY);
-				}
-				if( this.HitPlatformAtX != -1 ) {
-					hitPlatAt = (this.HitPlatformAtX, this.HitPlatformAtY);
-				}
-
-				var breakables = new Dictionary<int, ISet<int>>();
-				for( int i=0; i<this.BreakablesCount; i++ ) {
-					breakables.Set2D( this.BreakablesX[i], this.BreakablesY[i] );
-				}
-
-				//
-
-				BullwhipItem.ApplyStrike(
-					whipOwner: Main.player[this.PlayerWho],
-					start: new Vector2( this.StartX, this.StartY ),
-					direction: new Vector2( this.DirectionX, this.DirectionY ),
-					hitTileAt: hitTileAt,
-					hitPlatformAt: hitPlatAt,
-					breakables: breakables,
-					hitNpcs: this.HitNpcsWhos.Select( who=>Main.npc[who] ),
-					hitProjs: this.HitNpcsWhos.Select( who=>Main.projectile[who] ),
-					hitItems: this.HitNpcsWhos.Select( who=>Main.item[who] ),
-					hitPlayers: this.HitNpcsWhos.Select( who=>Main.player[who] ),
-					fxOnly: this.FxOnly
-				);
+			(int, int)? hitTileAt = null;
+			(int, int)? hitPlatAt = null;
+			if( this.HitTileAtX != -1 ) {
+				hitTileAt = (this.HitTileAtX, this.HitTileAtY);
 			}
+
+			if( this.HitPlatformAtX != -1 ) {
+				hitPlatAt = (this.HitPlatformAtX, this.HitPlatformAtY);
+			}
+
+			var breakables = new Dictionary<int, ISet<int>>();
+			for( int i=0; i<this.BreakablesCount; i++ ) {
+				breakables.Set2D( this.BreakablesX[i], this.BreakablesY[i] );
+			}
+
+			//
+
+			BullwhipItem.ApplyStrike(
+				whipOwner: Main.player[this.PlayerWho],
+				start: new Vector2( this.StartX, this.StartY ),
+				direction: new Vector2( this.DirectionX, this.DirectionY ),
+				hitTileAt: hitTileAt,
+				hitPlatformAt: hitPlatAt,
+				breakables: breakables,
+				hitNpcs: this.HitNpcsWhos.Select( who => Main.npc[who] ),
+				hitProjs: this.HitProjWhos.Select( who => Main.projectile[who] ),
+				hitItems: this.HitItemWhos.Select( who => Main.item[who] ),
+				hitPlayers: this.HitPlayerWhos.Select( who => Main.player[who] ),
+				fxOnly: this.FxOnly
+			);
 		}
 
 		////
@@ -183,7 +182,7 @@ namespace Bullwhip.Packets {
 			}
 
 			//
-
+			
 			this.Receive();
 		}
 	}

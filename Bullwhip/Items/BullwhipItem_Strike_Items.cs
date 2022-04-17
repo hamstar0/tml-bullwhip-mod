@@ -20,6 +20,12 @@ namespace Bullwhip.Items {
 
 			//foreach( (Vector2 target, IEnumerable<Item> items) in hitItemsAt ) {
 			foreach( Item item in hitItems ) {
+				if( item?.active != true ) {
+					continue;
+				}
+
+				//
+
 				if( checkedItems.Contains( item ) ) {
 					continue;
 				}
