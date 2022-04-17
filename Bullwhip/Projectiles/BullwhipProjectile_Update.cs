@@ -46,12 +46,11 @@ namespace Bullwhip.Projectiles {
 
 			//
 
-			this.StepThroughFrames();
-			//if( this.StepThroughFrames() ) {
-			//	if( isCurrentPlayer ) {
-			//		this.projectile.netUpdate = true;
-			//	}
-			//}
+			if( this.StepThroughFrames() ) {
+				if( isCurrentPlayer ) {
+					this.projectile.netUpdate = true;
+				}
+			}
 
 			//
 

@@ -110,12 +110,17 @@ namespace Bullwhip.Items {
 				quiet: !syncHurt
 			);
 
-			targetPlr.velocity += direction * kb;
-
 			//
 
 			if( syncHurt ) {
 				NetMessage.SendPlayerHurt( targetPlr.whoAmI, reason, dmg, player.direction, false, onlyHitsIfPvp, -1 );
+			}
+
+			//
+
+			targetPlr.velocity += direction * kb;
+
+			if( syncHurt ) {
 				NetMessage.SendData( MessageID.SyncPlayer, -1, -1, null, targetPlr.whoAmI );
 			}
 		}
