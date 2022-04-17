@@ -19,8 +19,9 @@ namespace Bullwhip.Items {
 		/// <param name="player"></param>
 		/// <param name="direction"></param>
 		/// <param name="fxOnly"></param>
-		/// <param name="syncIfServer"></param>
-		public static void CastStrike( Player player, Vector2 direction, bool fxOnly, bool syncIfServer ) {
+		/// <param name="syncStrikeAction">After deciding how the strike should work, this indicates whether to sync it
+		/// to the server and/or other players.</param>
+		public static void CastStrike( Player player, Vector2 direction, bool fxOnly, bool syncStrikeAction ) {
 			int minWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MinimumWhipHitDist) );
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			direction.Normalize();
@@ -78,26 +79,43 @@ namespace Bullwhip.Items {
 				hitItems: hitItems,
 				hitPlayers: hitPlayers,
 				fxOnly: fxOnly,
-				syncIfServer: syncIfServer
+				syncSpecificHitsIfServer: syncStrikeAction
 			);
 
 			//
 
-			if( syncIfServer && Main.netMode == NetmodeID.Server ) {
-				BullwhipHitsPacket.BroadcastFromServer(
-					player: player,
-					start: start,
-					direction: direction,
-					hitTileAt: hitTileAt,
-					hitPlatformAt: hitPlatformAt,
-					breakables: breakables,
-					hitNpcs: hitNpcs,
-					hitProjs: hitProjs,
-					hitItems: hitItems,
-					hitPlayers: hitPlayers,
-					fxOnly: fxOnly,
-					fxOnlyToClients: true
-				);
+			if( syncStrikeAction ) {
+				if( Main.netMode == NetmodeID.MultiplayerClient ) {
+					BullwhipHitsPacket.BroadcastFromClient(
+						player: player,
+						start: start,
+						direction: direction,
+						hitTileAt: hitTileAt,
+						hitPlatformAt: hitPlatformAt,
+						breakables: breakables,
+						hitNpcs: hitNpcs,
+						hitProjs: hitProjs,
+						hitItems: hitItems,
+						hitPlayers: hitPlayers,
+						fxOnly: fxOnly,
+						fxOnlyToClients: true
+					);
+				} else if( Main.netMode == NetmodeID.Server ) {
+					BullwhipHitsPacket.BroadcastFromServer(
+						player: player,
+						start: start,
+						direction: direction,
+						hitTileAt: hitTileAt,
+						hitPlatformAt: hitPlatformAt,
+						breakables: breakables,
+						hitNpcs: hitNpcs,
+						hitProjs: hitProjs,
+						hitItems: hitItems,
+						hitPlayers: hitPlayers,
+						fxOnly: fxOnly,
+						fxOnlyToClients: true
+					);
+				}
 			}
 		}
 

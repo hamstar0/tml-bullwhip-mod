@@ -77,7 +77,7 @@ namespace Bullwhip.Items {
 
 		////////////////
 
-		public static void GrabPlatform( Player player, int tileX, int tileY ) {
+		public static void GrabPlatform( Player player, int tileX, int tileY, bool fxOnly ) {
 			var bi = ModContent.GetInstance<BullwhipItem>();
 
 			bi.SoundInstance?.Stop();
@@ -85,9 +85,12 @@ namespace Bullwhip.Items {
 			//
 
 			var target = new Vector2( tileX * 16, tileY * 16 );
-			var myplayer = player.GetModPlayer<BullwhipPlayer>();
 
-			myplayer.SetPullHeading( player.Center - target );
+			if( !fxOnly ) {
+				var myplayer = player.GetModPlayer<BullwhipPlayer>();
+
+				myplayer.SetPullHeading( player.Center - target );
+			}
 
 			//
 

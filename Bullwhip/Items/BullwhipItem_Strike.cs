@@ -22,7 +22,7 @@ namespace Bullwhip.Items {
 					IEnumerable<Item> hitItems,
 					IEnumerable<Player> hitPlayers,
 					bool fxOnly,
-					bool syncIfServer ) {
+					bool syncSpecificHitsIfServer ) {
 //LogHelpers.Log("WHIP 2 - start:"+start.ToShortString()+", hitNpcsAt:"+hitNpcsAt.Count2D()+", hitProjsAt:"+hitProjsAt.Count2D()+", hitItemsAt:"+hitItemsAt.Count2D());
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			Vector2 maxPos = start + (direction * maxWhipDist);
@@ -35,6 +35,7 @@ namespace Bullwhip.Items {
 
 			//
 
+			// Destroy vines and shit
 			if( !fxOnly ) {
 				foreach( (int tileX, ISet<int> tileYs) in breakables ) {
 					foreach( int tileY in tileYs ) {
@@ -42,7 +43,7 @@ namespace Bullwhip.Items {
 
 						//
 
-						if( syncIfServer && Main.netMode == NetmodeID.Server ) {
+						if( syncSpecificHitsIfServer && Main.netMode == NetmodeID.Server ) {
 							NetMessage.SendData( MessageID.TileChange, -1, -1, null, 0, (float)tileX, (float)tileY, 0f, 0, 0, 0 );
 						}
 					}
@@ -51,21 +52,32 @@ namespace Bullwhip.Items {
 
 			//
 
-			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPCs( whipOwner, direction, hitNpcs, fxOnly, syncIfServer );
-			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectiles( whipOwner, direction, hitProjs, fxOnly, syncIfServer );
-			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItems( whipOwner, direction, hitItems, fxOnly, syncIfServer );
-			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayers( whipOwner, direction, hitPlayers, fxOnly, syncIfServer );
+			// Hit beasties and thingies
+			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPCs(
+				whipOwner, direction, hitNpcs, fxOnly, syncSpecificHitsIfServer
+			);
+			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectiles(
+				whipOwner, direction, hitProjs, fxOnly, syncSpecificHitsIfServer
+			);
+			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItems(
+				whipOwner, direction, hitItems, fxOnly, syncSpecificHitsIfServer
+			);
+			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayers(
+				whipOwner, direction, hitPlayers, fxOnly, syncSpecificHitsIfServer
+			);
 
 			//
 
+			// Grab platform (disabled for now)
 			if( !isNpcHit && !isPlrHit && !fxOnly ) {
 				if( hitPlatformAt.HasValue ) {
-					BullwhipItem.GrabPlatform( whipOwner, hitPlatformAt.Value.TileX, hitPlatformAt.Value.TileY );
+					BullwhipItem.GrabPlatform( whipOwner, hitPlatformAt.Value.TileX, hitPlatformAt.Value.TileY, fxOnly );
 				}
 			}
 
 			//
 
+			// Make fx
 			if( !isNpcHit && !isPlrHit ) {
 				if( !hitTileAt.HasValue && !hitPlatformAt.HasValue ) {
 					BullwhipItem.CreateHitAirFx( maxPos );

@@ -13,6 +13,41 @@ using Bullwhip.Items;
 
 namespace Bullwhip.Packets {
 	class BullwhipHitsPacket : SimplePacketPayload {
+		public static void BroadcastFromClient(
+					Player player,
+					Vector2 start,
+					Vector2 direction,
+					(int TileX, int TileY)? hitTileAt,
+					(int TileX, int TileY)? hitPlatformAt,
+					IDictionary<int, ISet<int>> breakables,
+					IEnumerable<NPC> hitNpcs,
+					IEnumerable<Projectile> hitProjs,
+					IEnumerable<Item> hitItems,
+					IEnumerable<Player> hitPlayers,
+					bool fxOnly,
+					bool fxOnlyToClients ) {
+			if( Main.netMode != NetmodeID.MultiplayerClient ) {
+				throw new ModLibsException("Not client");
+			}
+			
+			var payload = new BullwhipHitsPacket(
+				playerWho: player.whoAmI,
+				start: start,
+				direction: direction,
+				hitTileAt: hitTileAt,
+				hitPlatformAt: hitPlatformAt,
+				breakables: breakables,
+				hitNpcWhos: hitNpcs.Select( n=>n.whoAmI ).ToArray(),
+				hitProjWhos: hitProjs.Select( p=>Array.IndexOf(Main.projectile, p) ).ToArray(), //Main.projectileIdentity[p.owner, p.projUUID]
+				hitItemWhos: hitItems.Select( i=>Array.IndexOf(Main.item, i) ).ToArray(),
+				hitPlayerWhos: hitPlayers.Select( p=>p.whoAmI ).ToArray(),
+				fxOnly: fxOnly,
+				fxOnlyToClients: fxOnlyToClients
+			);
+			SimplePacket.SendToServer( payload );
+		}
+		
+
 		public static void BroadcastFromServer(
 					Player player,
 					Vector2 start,
@@ -170,14 +205,26 @@ namespace Bullwhip.Packets {
 				hitItems: this.HitItemWhos.Select( who => Main.item[who] ),
 				hitPlayers: this.HitPlayerWhos.Select( who => Main.player[who] ),
 				fxOnly: this.FxOnly || (this.FxOnlyToClients && Main.netMode == NetmodeID.MultiplayerClient),
-				syncIfServer: false
+				syncSpecificHitsIfServer: false
 			);
 		}
 
 		////
 
 		public override void ReceiveOnServer( int fromWho ) {
-			throw new ModLibsException( "Not implemented." );
+			Player plr = Main.player[ this.PlayerWho ];
+			if( plr?.active != true ) {
+				LogLibraries.Alert( "Invalid whipper player index " + this.PlayerWho );
+				return;
+			}
+
+			//
+			
+			this.Receive();
+
+			//
+
+			SimplePacket.SendToClient( this, -1, this.PlayerWho );
 		}
 
 		public override void ReceiveOnClient() {
