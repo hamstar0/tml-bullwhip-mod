@@ -14,7 +14,8 @@ namespace Bullwhip.Items {
 					Player player,
 					Vector2 direction,
 					IEnumerable<Projectile> hitProjs,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			//IDictionary<Vector2, IEnumerable<Projectile>> hitProjsAt ) {
 			var checkedProjs = new HashSet<Projectile>();
 			bool isProjHit = false;
@@ -35,7 +36,7 @@ namespace Bullwhip.Items {
 
 				//
 
-				if( BullwhipItem.StrikeProjectile_If( player, direction, /*target,*/ proj, fxOnly ) ) {
+				if( BullwhipItem.StrikeProjectile_If(player, direction, /*target,*/ proj, fxOnly, syncIfServer) ) {
 					proj.friendly = true;
 					proj.hostile = false;
 				}
@@ -56,7 +57,8 @@ namespace Bullwhip.Items {
 					Vector2 direction,
 					/*Vector2 hitWorldPosition,*/
 					Projectile proj,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			bool _ = false;
 			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, proj, fxOnly, ref _) ) {
 				return false;
@@ -82,6 +84,14 @@ namespace Bullwhip.Items {
 
 				proj.velocity = Vector2.Normalize( direction + proj.velocity );
 				proj.velocity *= speed;
+
+				//
+
+				if( syncIfServer && Main.netMode == NetmodeID.Server ) {
+					int projWho = Main.projectileIdentity[proj.owner, proj.projUUID];
+
+					NetMessage.SendData( MessageID.SyncProjectile, -1, -1, null, projWho );
+				}
 			}
 
 			//

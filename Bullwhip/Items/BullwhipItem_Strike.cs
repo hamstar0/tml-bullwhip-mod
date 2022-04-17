@@ -21,7 +21,8 @@ namespace Bullwhip.Items {
 					IEnumerable<Projectile> hitProjs,
 					IEnumerable<Item> hitItems,
 					IEnumerable<Player> hitPlayers,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 //LogHelpers.Log("WHIP 2 - start:"+start.ToShortString()+", hitNpcsAt:"+hitNpcsAt.Count2D()+", hitProjsAt:"+hitProjsAt.Count2D()+", hitItemsAt:"+hitItemsAt.Count2D());
 			int maxWhipDist = BullwhipConfig.Instance.Get<int>( nameof(BullwhipConfig.MaximumWhipHitDist) );
 			Vector2 maxPos = start + (direction * maxWhipDist);
@@ -37,13 +38,11 @@ namespace Bullwhip.Items {
 			if( !fxOnly ) {
 				foreach( (int tileX, ISet<int> tileYs) in breakables ) {
 					foreach( int tileY in tileYs ) {
-/*Timers.SetTimer("break_"+tileX+"_"+tileY, 50, false, () => {
-	Dust.QuickDust( new Point(tileX, tileY), Color.Red );
-	return true;
-} );*/
 						WorldGen.KillTile( tileX, tileY );
 
-						if( Main.netMode != NetmodeID.SinglePlayer ) {
+						//
+
+						if( syncIfServer && Main.netMode == NetmodeID.Server ) {
 							NetMessage.SendData( MessageID.TileChange, -1, -1, null, 0, (float)tileX, (float)tileY, 0f, 0, 0, 0 );
 						}
 					}
@@ -52,10 +51,10 @@ namespace Bullwhip.Items {
 
 			//
 
-			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPCs( whipOwner, direction, hitNpcs, fxOnly );
-			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectiles( whipOwner, direction, hitProjs, fxOnly );
-			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItems( whipOwner, direction, hitItems, fxOnly );
-			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayers( whipOwner, direction, hitPlayers, fxOnly );
+			bool isNpcHit = BullwhipItem.ApplyWhipStrikeOnNPCs( whipOwner, direction, hitNpcs, fxOnly, syncIfServer );
+			bool isProjHit = BullwhipItem.ApplyWhipStrikeOnProjectiles( whipOwner, direction, hitProjs, fxOnly, syncIfServer );
+			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItems( whipOwner, direction, hitItems, fxOnly, syncIfServer );
+			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayers( whipOwner, direction, hitPlayers, fxOnly, syncIfServer );
 
 			//
 

@@ -15,7 +15,8 @@ namespace Bullwhip.Items {
 					Player player,
 					Vector2 direction,
 					IEnumerable<NPC> hitNpcs,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			//IDictionary<Vector2, IEnumerable<NPC>> hitNpcsAt ) {
 			bool isNpcHit = false;
 			var checkedNpcs = new HashSet<NPC>();
@@ -36,7 +37,7 @@ namespace Bullwhip.Items {
 
 				//
 
-				BullwhipItem.StrikeNPC_If( player, direction, /*target,*/ npc, fxOnly );
+				BullwhipItem.StrikeNPC_If( player, direction, /*target,*/ npc, fxOnly, syncIfServer );
 
 				isNpcHit = true;
 			}
@@ -52,7 +53,8 @@ namespace Bullwhip.Items {
 					Vector2 direction,
 					/*Vector2 hitWorldPosition,*/
 					NPC npc,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			if( npc.immortal || npc.dontTakeDamage ) {
 				return;
 			}
@@ -78,9 +80,27 @@ namespace Bullwhip.Items {
 						kb *= 0.65f;
 					}
 
+					//
+
 					BullwhipItem.StrikeNPC_AI( player, /*hitWorldPosition,*/ npc, ref kb );
 
 					npc.StrikeNPC( dmg, kb, player.direction );
+
+					//
+
+					if( syncIfServer && Main.netMode == NetmodeID.Server ) {
+						NetMessage.SendData(
+							msgType: MessageID.StrikeNPC,
+							remoteClient: -1,
+							ignoreClient: -1,
+							text: null,
+							number: npc.whoAmI,
+							number2: dmg,
+							number3: kb,
+							number4: player.direction,
+							number5: false.ToInt()
+						);
+					}
 				}
 
 				//
@@ -108,7 +128,7 @@ namespace Bullwhip.Items {
 
 			switch( npc.aiStyle ) {
 			case 1:     // slimes
-				BullwhipItem.ApplySlimeshot( npc );
+				BullwhipItem.ApplySlimeshot_Host( npc );
 				break;
 			case 3:     // fighters
 				if( !mynpc.IsConfuseWhipped /*&& BullwhipItem.IsHeadshot(npc, hitWorldPosition)*/ ) {

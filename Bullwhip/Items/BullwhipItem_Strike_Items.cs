@@ -13,7 +13,8 @@ namespace Bullwhip.Items {
 					Player player,
 					Vector2 direction,
 					IEnumerable<Item> hitItems,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			//IDictionary<Vector2, IEnumerable<Item>> hitItemsAt ) {
 			var checkedItems = new HashSet<Item>();
 			bool isItemHit = false;
@@ -34,7 +35,7 @@ namespace Bullwhip.Items {
 
 				//
 
-				BullwhipItem.StrikeItem_If( player, direction, /*target,*/ item, fxOnly );
+				BullwhipItem.StrikeItem_If( player, direction, /*target,*/ item, fxOnly, syncIfServer );
 
 				//
 
@@ -52,7 +53,8 @@ namespace Bullwhip.Items {
 					Vector2 direction,
 					/*Vector2 hitWorldPosition,*/
 					Item item,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			bool _ = false;
 			if( !BullwhipAPI.OnPreBullwhipEntityHit(player, item, fxOnly, ref _ ) ) {
 				return;
@@ -62,6 +64,12 @@ namespace Bullwhip.Items {
 
 			if( !fxOnly ) {
 				item.Center = player.MountedCenter;
+
+				//
+
+				if( syncIfServer && Main.netMode == NetmodeID.Server ) {
+					NetMessage.SendData( MessageID.SyncItem, -1, -1, null, item.whoAmI );
+				}
 			}
 		}
 	}

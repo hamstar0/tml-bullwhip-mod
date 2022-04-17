@@ -77,7 +77,8 @@ namespace Bullwhip.Items {
 				hitProjs: hitProjs,
 				hitItems: hitItems,
 				hitPlayers: hitPlayers,
-				fxOnly: fxOnly
+				fxOnly: fxOnly,
+				syncIfServer: syncIfServer
 			);
 
 			//
@@ -94,7 +95,8 @@ namespace Bullwhip.Items {
 					hitProjs: hitProjs,
 					hitItems: hitItems,
 					hitPlayers: hitPlayers,
-					fxOnly: fxOnly
+					fxOnly: fxOnly,
+					fxOnlyToClients: true
 				);
 			}
 		}

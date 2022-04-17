@@ -14,7 +14,8 @@ namespace Bullwhip.Items {
 					Player player,
 					Vector2 direction,
 					IEnumerable<Player> hitPlayers,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			//IDictionary<Vector2, IEnumerable<Player>> hitPlayersAt ) {
 			var checkedPlayers = new HashSet<Player>();
 			bool isPlayerHit = false;
@@ -35,7 +36,7 @@ namespace Bullwhip.Items {
 
 				//
 
-				BullwhipItem.StrikePlayer_If( player, direction, /*target,*/ plr, fxOnly );
+				BullwhipItem.StrikePlayer_If( player, direction, /*target,*/ plr, fxOnly, syncIfServer );
 
 				//
 
@@ -53,7 +54,8 @@ namespace Bullwhip.Items {
 					Vector2 direction,
 					/*Vector2 hitWorldPosition,*/
 					Player targetPlr,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool syncIfServer ) {
 			if( targetPlr.dead || targetPlr.immune ) {
 				return;
 			}
@@ -67,20 +69,14 @@ namespace Bullwhip.Items {
 
 			//
 
-			var config = BullwhipConfig.Instance;
-
-			bool ignorePvp = config.Get<bool>( nameof(config.WhipIgnoresPvP) );
-			bool onlyHitsIfPvp = !ignorePvp;
-
-			//bool canPvp = player.hostile && targetPlr.hostile
-			//	&& (targetPlr.team != player.team || player.team == 0);
-			//if( !canPvp && !config.Get<bool>( nameof(config.WhipIgnoresPvP) ) ) {
-			//	return;
-			//}
-
-			//
-
 			if( !fxOnly ) {
+				var config = BullwhipConfig.Instance;
+
+				bool ignorePvp = config.Get<bool>( nameof(config.WhipIgnoresPvP) );
+				bool onlyHitsIfPvp = !ignorePvp;
+
+				//
+
 				int dmg = config.Get<int>( nameof(BullwhipConfig.WhipDamage) );
 				float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
 
@@ -96,7 +92,7 @@ namespace Bullwhip.Items {
 
 				//
 
-				if( Main.netMode == NetmodeID.Server ) {
+				if( syncIfServer && Main.netMode == NetmodeID.Server ) {
 					NetMessage.SendData( MessageID.SyncPlayer, -1, -1, null, targetPlr.whoAmI );
 				}
 			}

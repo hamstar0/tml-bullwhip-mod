@@ -24,7 +24,8 @@ namespace Bullwhip.Packets {
 					IEnumerable<Projectile> hitProjs,
 					IEnumerable<Item> hitItems,
 					IEnumerable<Player> hitPlayers,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool fxOnlyToClients ) {
 			if( Main.netMode != NetmodeID.Server ) {
 				throw new ModLibsException("Not server");
 			}
@@ -40,7 +41,8 @@ namespace Bullwhip.Packets {
 				hitProjWhos: hitProjs.Select( p=>Array.IndexOf(Main.projectile, p) ).ToArray(),
 				hitItemWhos: hitItems.Select( i=>Array.IndexOf(Main.item, i) ).ToArray(),
 				hitPlayerWhos: hitPlayers.Select( p=>p.whoAmI ).ToArray(),
-				fxOnly: fxOnly
+				fxOnly: fxOnly,
+				fxOnlyToClients: fxOnlyToClients
 			);
 			SimplePacket.SendToClient( payload, -1, -1 );
 		}
@@ -71,6 +73,7 @@ namespace Bullwhip.Packets {
 		public int[] HitPlayerWhos;
 
 		public bool FxOnly;
+		public bool FxOnlyToClients;
 
 
 
@@ -89,7 +92,8 @@ namespace Bullwhip.Packets {
 					int[] hitProjWhos,
 					int[] hitItemWhos,
 					int[] hitPlayerWhos,
-					bool fxOnly ) {
+					bool fxOnly,
+					bool fxOnlyToClients ) {
 			this.PlayerWho = playerWho;
 
 			this.StartX = start.X;
@@ -130,6 +134,7 @@ namespace Bullwhip.Packets {
 			this.HitPlayerWhos = hitPlayerWhos;
 
 			this.FxOnly = fxOnly;
+			this.FxOnlyToClients = fxOnlyToClients;
 		}
 
 
@@ -164,7 +169,8 @@ namespace Bullwhip.Packets {
 				hitProjs: this.HitProjWhos.Select( who => Main.projectile[who] ),
 				hitItems: this.HitItemWhos.Select( who => Main.item[who] ),
 				hitPlayers: this.HitPlayerWhos.Select( who => Main.player[who] ),
-				fxOnly: this.FxOnly
+				fxOnly: this.FxOnly || (this.FxOnlyToClients && Main.netMode == NetmodeID.MultiplayerClient),
+				syncIfServer: false
 			);
 		}
 

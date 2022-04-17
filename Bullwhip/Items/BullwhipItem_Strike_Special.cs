@@ -9,15 +9,18 @@ using ModLibsCore.Libraries.TModLoader;
 
 namespace Bullwhip.Items {
 	public partial class BullwhipItem : ModItem {
-		public static void ApplySlimeshot( NPC npc ) {
-			if( Main.netMode == 1 ) {
+		public static void ApplySlimeshot_Host( NPC npc ) {
+			if( Main.netMode == NetmodeID.MultiplayerClient ) {
 				return;
 			}
 
+			//
+
 			UnifiedRandom rand = TmlLibraries.SafelyGetRand();
-			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 
 			if( rand.Next(4) == 0 ) {
+				var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
+
 				mynpc.ApplyEnrage( npc );
 			}
 		}
@@ -30,6 +33,8 @@ namespace Bullwhip.Items {
 			rect.Y -= rect.Height / 3;
 			rect.Width = 3 * rect.Width;
 			rect.Height = rect.Height / 2;
+
+			//
 
 			if( BullwhipConfig.Instance.DebugModeStrikeInfo ) {
 				Dust.QuickBox(
@@ -48,6 +53,8 @@ namespace Bullwhip.Items {
 				);
 			}
 
+			//
+
 			return rect.Contains( (int)targetPoint.X, (int)targetPoint.Y );
 		}
 
@@ -58,7 +65,12 @@ namespace Bullwhip.Items {
 			int tickDuration = 60 * rand.Next(4, 9);
 			var mynpc = npc.GetGlobalNPC<BullwhipNPC>();
 
+			//
+
 			npc.AddBuff( BuffID.Confused, tickDuration );
+
+			//
+
 			mynpc.IsConfuseWhipped = true;
 		}
 
@@ -72,7 +84,7 @@ namespace Bullwhip.Items {
 
 			//
 
-			var target = new Vector2( tileX << 4, tileY << 4 );
+			var target = new Vector2( tileX * 16, tileY * 16 );
 			var myplayer = player.GetModPlayer<BullwhipPlayer>();
 
 			myplayer.SetPullHeading( player.Center - target );
