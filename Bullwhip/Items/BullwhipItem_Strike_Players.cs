@@ -35,7 +35,8 @@ namespace Bullwhip.Items {
 				checkedPlayers.Add( plr );
 
 				//
-
+				
+//LogLibraries.Log( "WHIP 2 - "+plr.name );
 				BullwhipItem.StrikePlayer_If( player, direction, /*target,*/ plr, fxOnly, syncIfServer );
 
 				//
@@ -69,6 +70,7 @@ namespace Bullwhip.Items {
 
 			//
 
+//LogLibraries.Log( "WHIP 3 - "+targetPlr.name+" "+fxOnly );
 			if( !fxOnly ) {
 				BullwhipItem.StrikePlayerNoFx( player, direction, targetPlr, syncIfServer );
 			}
@@ -89,8 +91,9 @@ namespace Bullwhip.Items {
 					bool syncIfServer ) {
 			var config = BullwhipConfig.Instance;
 
-			bool ignorePvp = config.Get<bool>( nameof(config.WhipIgnoresPvP) );
+			bool ignorePvp = config.Get<bool>( nameof(config.WhipIgnoresPvPOnlyRestriction) );
 			bool onlyHitsIfPvp = !ignorePvp;
+			bool isPvpHit = onlyHitsIfPvp && player.hostile;    // LUL
 
 			//
 
@@ -98,31 +101,26 @@ namespace Bullwhip.Items {
 			float kb = config.Get<float>( nameof(BullwhipConfig.WhipKnockback) );
 			PlayerDeathReason reason = PlayerDeathReason.ByPlayer( player.whoAmI );
 
-			bool syncHurt = syncIfServer && Main.netMode == NetmodeID.Server;
-
 			//
-
+			
+//LogLibraries.Log( "WHIP 4 - "+targetPlr.name+" "+(onlyHitsIfPvp && player.hostile)+" "+syncHurt );
 			targetPlr.Hurt(
 				damageSource: reason,
 				Damage: dmg,
 				hitDirection: player.direction,
-				pvp: onlyHitsIfPvp,	// LUL
-				quiet: !syncHurt
+				pvp: isPvpHit,
+				quiet: true
 			);
 
 			//
 
-			/*if( syncHurt ) {
-				NetMessage.SendPlayerHurt( targetPlr.whoAmI, reason, dmg, player.direction, false, onlyHitsIfPvp, -1 );
+			if( syncIfServer && Main.netMode == NetmodeID.Server ) {
+				NetMessage.SendPlayerHurt( targetPlr.whoAmI, reason, dmg, player.direction, false, isPvpHit, -1, -1, -1 );
 			}
 
 			//
 
-			targetPlr.velocity += direction * kb;*/
-
-			if( syncHurt ) {
-				NetMessage.SendData( MessageID.SyncPlayer, -1, -1, null, targetPlr.whoAmI );
-			}
+			/*targetPlr.velocity += direction * kb;*/
 		}
 	}
 }

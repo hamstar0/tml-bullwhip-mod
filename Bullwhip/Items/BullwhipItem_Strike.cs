@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -62,6 +63,7 @@ namespace Bullwhip.Items {
 			bool isItemHit = BullwhipItem.ApplyWhipStrikeOnItems(
 				whipOwner, direction, hitItems, fxOnly, syncSpecificHitsIfServer
 			);
+//LogLibraries.Log( "WHIP 1 - "+string.Join(", ", hitPlayers.Select(p=>p.name)) );
 			bool isPlrHit = BullwhipItem.ApplyWhipStrikeOnPlayers(
 				whipOwner, direction, hitPlayers, fxOnly, syncSpecificHitsIfServer
 			);

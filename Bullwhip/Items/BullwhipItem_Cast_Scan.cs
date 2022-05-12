@@ -45,10 +45,10 @@ namespace Bullwhip.Items {
 
 			//
 
-			var currHitNpcsAt = hitNpcsAt;
-			var currHitProjsAt = hitProjsAt;
-			var currHitItemsAt = hitItemsAt;
-			var currHitPlayersAt = hitPlayersAt;
+			IDictionary<Vector2, IEnumerable<NPC>> currHitNpcsAt = hitNpcsAt;
+			IDictionary<Vector2, IEnumerable<Projectile>> currHitProjsAt = hitProjsAt;
+			IDictionary<Vector2, IEnumerable<Item>> currHitItemsAt = hitItemsAt;
+			IDictionary<Vector2, IEnumerable<Player>> currHitPlayersAt = hitPlayersAt;
 
 			bool CheckPerUnit( Vector2 wldPos ) {
 				return BullwhipItem.CastStrikeScanPerUnit(

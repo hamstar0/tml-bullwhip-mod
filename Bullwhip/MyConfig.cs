@@ -83,7 +83,7 @@ namespace Bullwhip {
 
 
 		[DefaultValue( true )]
-		public bool WhipIgnoresPvP { get; set; } = true;
+		public bool WhipIgnoresPvPOnlyRestriction { get; set; } = true;
 
 
 		////

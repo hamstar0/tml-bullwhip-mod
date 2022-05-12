@@ -1,6 +1,6 @@
 displayName = Bullwhip
 author = hamstar
-version = 1.6.3
+version = 1.6.3.1
 modReferences = ModLibsCore@1.5.1, ModLibsGeneral@1.2.0
 weakReferences = SoulBarriers@3.0.1, TheTrickster@1.7.1
 buildIgnore = *.csproj, *.user, *.bat, obj\*, bin\*, .vs\*, .git\*
